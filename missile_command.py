@@ -5,6 +5,8 @@ from constants import *
 
 class Base:
     def __init__(self, x):
+        if not isinstance(x, (int, float)):
+            raise TypeError("x must be a numeric value")
         self.x = x
         self.y = BASE_Y
         self.is_alive = True
@@ -78,7 +80,7 @@ class Missile:
         dy = self.target_y - self.y
         distance = math.sqrt(dx**2 + dy**2)
 
-        if distance < self.speed:
+        if distance <= self.speed:
             self.x = self.target_x
             self.y = self.target_y
             self.is_alive = False
@@ -105,10 +107,11 @@ class Explosion:
         if not self.is_alive:
             return
 
-        self.radius += 0.5
-        self.duration -= 1
         if self.radius >= self.max_radius or self.duration <= 0:
             self.is_alive = False
+        else:
+            self.radius += 0.5
+            self.duration -= 1
 
     def draw(self):
         if self.is_alive:
@@ -120,6 +123,8 @@ class App:
         pyxel.load("my_resource.pyxres") # リソースファイル読み込み
         self.reset() # ゲーム状態をリセット
         pyxel.mouse(True) # マウスポインタ表示
+
+    def run(self):
         pyxel.run(self.update, self.draw)
 
     def reset(self):
@@ -222,6 +227,8 @@ class App:
     def check_game_over(self):
         if not any(city.is_alive for city in self.cities) or not any(base.is_alive for base in self.bases):
             self.game_over = True
+        else:
+            self.game_over = False
 
     def draw(self):
         pyxel.cls(0)
@@ -244,4 +251,6 @@ class App:
             pyxel.text(pyxel.width // 2 - 40, pyxel.height // 2 - 10, "GAME OVER", 8)
             pyxel.text(pyxel.width // 2 - 60, pyxel.height // 2 + 5, "CLICK or SPACE to RETRY", 7)
 
-App()
+if __name__ == "__main__":
+    app = App()
+    app.run()
