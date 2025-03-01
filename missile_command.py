@@ -34,25 +34,39 @@ class Meteor:
         self.angle = 0
 
     def update(self, bases, cities, explosions, score):
-        self.y += self.speed * math.sin(math.radians(90 + self.angle))
-        self.x += self.speed * math.cos(math.radians(90 + self.angle))
+        self._move()
         if self.y >= GRAND_Y:
             self.is_alive = False
             return score, explosions
 
-        for base in bases:
-            if base.is_alive and abs(self.x - base.x) < 8 and abs(self.y - base.y - 4) < 8:
-                self.is_alive = False
-                base.is_alive = False
-                explosions.append(Explosion(self.x, self.y))
-                return score - 10, explosions
+        score, explosions = self._check_base_collision(bases, explosions, score)
 
+        score, explosions = self._check_city_collision(cities, explosions, score)
+        
+        return score, explosions
+
+    def _move(self):
+        self.y += self.speed * math.sin(math.radians(90 + self.angle))
+        self.x += self.speed * math.cos(math.radians(90 + self.angle))
+
+    def _check_city_collision(self, cities, explosions, score):
         for city in cities:
-            if city.is_alive and abs(self.x - city.x) < 8 and abs(self.y - city.y - 4) < 8:
+            distance = math.sqrt((self.x - city.x)**2 + (self.y - city.y - 4)**2)
+            if city.is_alive and distance <= 8:
                 self.is_alive = False
                 city.is_alive = False
                 explosions.append(Explosion(self.x, self.y))
                 return score - 5, explosions
+        return score, explosions
+
+    def _check_base_collision(self, bases, explosions, score):
+        for base in bases:
+            distance = math.sqrt((self.x - base.x)**2 + (self.y - base.y - 4)**2)
+            if base.is_alive and distance <= 8:
+                self.is_alive = False
+                base.is_alive = False
+                explosions.append(Explosion(self.x, self.y))
+                return score - 10, explosions
         return score, explosions
 
     def draw(self):
@@ -167,17 +181,15 @@ class App:
                 self.check_ground_hit(meteor.x)
         self.meteors = updated_meteors
 
-        for missile in self.missiles:
-            missile.update()
-            if not missile.is_alive:
-                self.missiles.remove(missile)
-                if missile.explosion:
-                    self.explosions.append(missile.explosion)
 
-        for explosion in self.explosions:
-            explosion.update()
-            if not explosion.is_alive:
-                self.explosions.remove(explosion)
+        # Update and remove dead missiles and explosions
+        for entity_list in [self.missiles, self.explosions]:
+            updated_entities = []
+            for entity in entity_list:
+                entity.update()
+                if entity.is_alive:
+                    updated_entities.append(entity)
+            entity_list[:] = updated_entities
 
         if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
             if any(base.is_alive for base in self.bases):

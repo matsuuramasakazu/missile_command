@@ -36,32 +36,56 @@ class TestMeteor(unittest.TestCase):
         self.assertTrue(meteor.is_alive)
 
 
+    @patch('missile_command.Meteor._check_base_collision')
     @patch('missile_command.Explosion')
-    def test_meteor_update_base_collision(self, MockExplosion):
+    def test_meteor_update_base_collision(self, MockExplosion, MockCheckBaseCollision):
         bases = [Base(100)]
         cities = []
         explosions = []
         score = 100
         meteor = Meteor(100, BASE_Y - 4, 1)
+        MockCheckBaseCollision.return_value = (score - 10, explosions)
         score, explosions = meteor.update(bases, cities, explosions, score)
+        self.assertEqual(MockCheckBaseCollision.call_count, 1)
+        self.assertEqual(score, 90)
+
+    @patch('missile_command.Meteor._check_city_collision')
+    @patch('missile_command.Explosion')
+    def test_meteor_update_city_collision(self, MockExplosion, MockCheckCityCollision):
+        bases = []
+        cities = [City(100)]
+        explosions = []
+        score = 100
+        meteor = Meteor(100, CITY_Y-4, 1)
+        MockCheckCityCollision.return_value = (score - 5, explosions)
+        score, explosions = meteor.update(bases, cities, explosions, score)
+        self.assertEqual(MockCheckCityCollision.call_count, 1)
+        self.assertEqual(score, 95)
+
+    @patch('missile_command.Explosion')
+    def test_meteor_check_base_collision(self, MockExplosion):
+        bases = [Base(100)]
+        explosions = []
+        score = 100
+        meteor = Meteor(100, BASE_Y - 4, 1)
+        score, explosions = meteor._check_base_collision(bases, explosions, score)
         self.assertFalse(meteor.is_alive)
         self.assertFalse(bases[0].is_alive)
         self.assertEqual(len(explosions), 1)
         self.assertEqual(score, 90)
 
     @patch('missile_command.Explosion')
-    def test_meteor_update_city_collision(self, MockExplosion):
+    def test_meteor_check_city_collision(self, MockExplosion):
         bases = []
         cities = [City(100)]
         explosions = []
         score = 100
         meteor = Meteor(100, CITY_Y-4, 1)
-        score, explosions = meteor.update(bases, cities, explosions, score)
+        score, explosions = meteor._check_city_collision(cities, explosions, score)
         self.assertFalse(meteor.is_alive)
         self.assertFalse(cities[0].is_alive)
         self.assertEqual(len(explosions), 1)
         self.assertEqual(score, 95)
-
 
 
 class TestMissile(unittest.TestCase):
