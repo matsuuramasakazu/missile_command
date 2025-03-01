@@ -13,7 +13,7 @@ class Base:
 
     def draw(self):
         if self.is_alive:
-            pyxel.blt(self.x - 8, self.y, 0, 8, 0, 16, 8) # ピクセルマップ描画
+            pyxel.blt(self.x - BASE_IMG_WIDTH // 2, self.y, 0, BASE_IMG_X, BASE_IMG_Y, BASE_IMG_WIDTH, BASE_IMG_HEIGHT)
 
 class City:
     def __init__(self, x):
@@ -23,7 +23,7 @@ class City:
 
     def draw(self):
         if self.is_alive:
-            pyxel.blt(self.x - 8, self.y, 0, 0, 8, 16, 8) # ピクセルマップ描画
+            pyxel.blt(self.x - CITY_IMG_WIDTH // 2, self.y, 0, CITY_IMG_X, CITY_IMG_Y, CITY_IMG_WIDTH, CITY_IMG_HEIGHT)
 
 class Meteor:
     def __init__(self, x, y, speed):
@@ -50,8 +50,8 @@ class Meteor:
 
     def _check_city_collision(self, cities, explosions, score):
         for city in cities:
-            distance = math.sqrt((self.x - city.x)**2 + (self.y - city.y - 4)**2)
-            if city.is_alive and distance <= 8:
+            distance = math.sqrt((self.x - city.x)**2 + (self.y - city.y - CITY_COLLISION_OFFSET)**2)
+            if city.is_alive and distance <= CITY_IMG_WIDTH // 2:
                 self.is_alive = False
                 city.is_alive = False
                 explosions.append(Explosion(self.x, self.y))
@@ -60,8 +60,8 @@ class Meteor:
 
     def _check_base_collision(self, bases, explosions, score):
         for base in bases:
-            distance = math.sqrt((self.x - base.x)**2 + (self.y - base.y - 4)**2)
-            if base.is_alive and distance <= 8:
+            distance = math.sqrt((self.x - base.x)**2 + (self.y - base.y - BASE_COLLISION_OFFSET)**2)
+            if base.is_alive and distance <= BASE_IMG_WIDTH // 2:
                 self.is_alive = False
                 base.is_alive = False
                 explosions.append(Explosion(self.x, self.y))
@@ -70,7 +70,7 @@ class Meteor:
 
     def draw(self):
         if self.is_alive:
-            pyxel.circ(self.x, self.y, 1, 14)
+            pyxel.circ(self.x, self.y, METEOR_RADIUS, METEOR_COLOR)
 
 class Missile:
     def __init__(self, start_base, target_x, target_y):
@@ -80,7 +80,7 @@ class Missile:
         self.y = self.start_y
         self.target_x = target_x
         self.target_y = target_y
-        self.speed = 5
+        self.speed = MISSILE_SPEED
         self.is_alive = True
         self.explosion = None
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
@@ -104,14 +104,14 @@ class Missile:
 
     def draw(self):
         if self.is_alive:
-            pyxel.line(self.start_x, self.start_y, self.x, self.y, 10)
-            pyxel.circ(self.x, self.y, 1, 10)
+            pyxel.line(self.start_x, self.start_y, self.x, self.y, MISSILE_COLOR)
+            pyxel.circ(self.x, self.y, MISSILE_RADIUS, MISSILE_COLOR)
 
 class Explosion:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.radius = 1
+        self.radius = EXPLOSION_INITIAL_RADIUS
         self.max_radius = EXPLOSION_RADIUS_MAX
         self.duration = EXPLOSION_DURATION
         self.is_alive = True
@@ -123,12 +123,12 @@ class Explosion:
         if self.radius >= self.max_radius or self.duration <= 0:
             self.is_alive = False
         else:
-            self.radius += 0.5
-            self.duration -= 1
+            self.radius += EXPLOSION_RADIUS_INCREMENT
+            self.duration -= EXPLOSION_DURATION_DECREMENT
 
     def draw(self):
         if self.is_alive:
-            pyxel.circ(self.x, self.y, self.radius, 8)
+            pyxel.circ(self.x, self.y, self.radius, EXPLOSION_COLOR)
 
 class App:
     def __init__(self):
@@ -141,8 +141,8 @@ class App:
         pyxel.run(self.update, self.draw)
 
     def reset(self):
-        self.bases = [Base(20), Base(160), Base(300)] # 基地のx座標を調整
-        self.cities = [City(60), City(90), City(120), City(200), City(230), City(260)] # 都市のx座標を調整
+        self.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.cities = [City(x) for x in CITY_X_POSITIONS]
         self.meteors = []
         self.missiles = []
         self.explosions = []
@@ -156,15 +156,15 @@ class App:
                 self.reset() # ゲームリセット処理を呼び出す
             return
 
-        if pyxel.frame_count % 30 == 0:
-            for _ in range(1):
-                angle = random.uniform(-45, 45)
+        if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
+            for _ in range(METEOR_SPAWN_COUNT):
+                angle = random.uniform(-METEOR_ANGLE_RANGE, METEOR_ANGLE_RANGE)
                 meteor_x = random.randint(0, SCREEN_WIDTH)
                 meteor_speed = random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX)/2
-                meteor = Meteor(meteor_x, 0, meteor_speed)
+                meteor = Meteor(meteor_x, METEOR_INITIAL_Y, meteor_speed)
                 meteor.angle = angle
 
-                if not (0 - 5 < meteor.x + SCREEN_HEIGHT * math.cos(math.radians(90 + angle)) < SCREEN_WIDTH + 5):
+                if not (0 - METEOR_OFFSCREEN_OFFSET < meteor.x + SCREEN_HEIGHT * math.cos(math.radians(90 + angle)) < SCREEN_WIDTH + METEOR_OFFSCREEN_OFFSET):
                     continue
 
                 self.meteors.append(meteor)
@@ -201,10 +201,10 @@ class App:
 
     def check_ground_hit(self, meteor_x):
         for base in self.bases:
-            if base.is_alive and abs(base.x - meteor_x) < 16:
+            if base.is_alive and abs(base.x - meteor_x) < GROUND_HIT_DISTANCE:
                 base.is_alive = False
         for city in self.cities:
-            if city.is_alive and abs(city.x- meteor_x) < 16:
+            if city.is_alive and abs(city.x- meteor_x) < GROUND_HIT_DISTANCE:
                 city.is_alive = False
 
     def find_nearest_base(self, mouse_x):
@@ -229,7 +229,7 @@ class App:
                 if not meteor.is_alive:
                     continue
                 distance = math.sqrt((explosion.x - meteor.x)**2 + (explosion.y - meteor.y)**2)
-                if distance < explosion.radius + 3:
+                if distance < explosion.radius + COLLISION_DISTANCE:
                     meteor.is_alive = False
                     self.score += 5
                     self.meteors.remove(meteor)
@@ -243,7 +243,7 @@ class App:
 
     def draw(self):
         pyxel.cls(0)
-        pyxel.rect(0, GRAND_Y, SCREEN_WIDTH, SCREEN_HEIGHT - GRAND_Y, 2)
+        pyxel.rect(0, GRAND_Y, SCREEN_WIDTH, SCREEN_HEIGHT - GRAND_Y, GROUND_COLOR)
 
         for base in self.bases:
             base.draw()
@@ -256,11 +256,11 @@ class App:
         for explosion in self.explosions:
             explosion.draw()
 
-        pyxel.text(5, 5, f"SCORE: {self.score}", 7)
+        pyxel.text(SCORE_TEXT_X, SCORE_TEXT_Y, f"SCORE: {self.score}", SCORE_TEXT_COLOR)
 
         if self.game_over:
-            pyxel.text(pyxel.width // 2 - 40, pyxel.height // 2 - 10, "GAME OVER", 8)
-            pyxel.text(pyxel.width // 2 - 60, pyxel.height // 2 + 5, "CLICK or SPACE to RETRY", 7)
+            pyxel.text(pyxel.width // 2 - GAME_OVER_TEXT_X_OFFSET, pyxel.height // 2 - GAME_OVER_TEXT_Y_OFFSET, "GAME OVER", GAME_OVER_TEXT_COLOR)
+            pyxel.text(pyxel.width // 2 - RETRY_TEXT_X_OFFSET, pyxel.height // 2 + RETRY_TEXT_Y_OFFSET, "CLICK or SPACE to RETRY", RETRY_TEXT_COLOR)
 
 if __name__ == "__main__":
     app = App()
