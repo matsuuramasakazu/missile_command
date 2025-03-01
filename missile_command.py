@@ -40,7 +40,6 @@ class Meteor:
             return score, explosions
 
         score, explosions = self._check_base_collision(bases, explosions, score)
-
         score, explosions = self._check_city_collision(cities, explosions, score)
         
         return score, explosions
