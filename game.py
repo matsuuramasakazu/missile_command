@@ -30,9 +30,15 @@ class Game:
                 self.reset()
             return
 
-        self.score = self.meteor_manager.update(self.score)
         self.missile_manager.update()
 
+        collisions = self.meteor_manager.update()
+        for collision in collisions:
+            if collision['base']:
+                self.score -= 10
+            if collision['city']:
+                self.score -= 5
+        
         is_collision = self.missile_explosions_detector.check_collisions()
         if is_collision:
             self.score += 5

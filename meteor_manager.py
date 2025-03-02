@@ -12,7 +12,7 @@ class MeteorManager:
         self.meteors = []
         self.explosions = []
 
-    def update(self, score):
+    def update(self):
         if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
             for _ in range(METEOR_SPAWN_COUNT):
                 angle = random.uniform(-METEOR_ANGLE_RANGE, METEOR_ANGLE_RANGE)
@@ -27,8 +27,10 @@ class MeteorManager:
                 self.meteors.append(meteor)
 
         updated_meteors = []
+        collisions = [] # 全ての隕石の衝突情報を格納
         for meteor in self.meteors:
-            score, self.explosions = meteor.update(self.bases, self.cities, self.explosions, score)
+            collision_data = meteor.update(self.bases, self.cities, self.explosions)
+            collisions.append(collision_data)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
         self.meteors[:] = updated_meteors
@@ -40,7 +42,7 @@ class MeteorManager:
                 updated_explosions.append(explosion)
         self.explosions[:] = updated_explosions
         
-        return score
+        return collisions
 
     def draw(self):
         for meteor in self.meteors:
