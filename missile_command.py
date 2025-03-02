@@ -3,6 +3,49 @@ import math
 import random
 from constants import *
 
+
+class UFO:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.is_alive = True
+
+    def update(self):
+        self.x -= UFO_SPEED  # Assuming UFO moves from right to left
+        if self.x < -UFO_WIDTH:
+            self.is_alive = False
+
+    def draw(self):
+        if self.is_alive:
+            pyxel.blt(self.x, self.y, 0, UFO_IMG_X, UFO_IMG_Y, UFO_WIDTH, UFO_HEIGHT)
+
+
+class UFOManger:
+    def __init__(self):
+        self.ufos = []
+        self.next_spawn_frame = pyxel.frame_count + random.uniform(UFO_SPAWN_INTERVAL, UFO_SPAWN_INTERVAL * 5)
+
+    def update(self):
+        if pyxel.frame_count >= self.next_spawn_frame:
+            self.spawn_ufo()
+            self.next_spawn_frame = pyxel.frame_count + random.uniform(UFO_SPAWN_INTERVAL, UFO_SPAWN_INTERVAL * 5)
+
+        updated_ufos = []
+        for ufo in self.ufos:
+            ufo.update()
+            if ufo.is_alive:
+                updated_ufos.append(ufo)
+        self.ufos[:] = updated_ufos
+
+    def spawn_ufo(self):
+      # Spawn UFO at a random y position at the right edge of the screen
+        y = random.randint(UFO_HEIGHT, UFO_FLYING_HEIGHT_LIMIT)
+        self.ufos.append(UFO(SCREEN_WIDTH, y))
+
+    def draw(self):
+        for ufo in self.ufos:
+            ufo.draw()
+
 class Base:
     def __init__(self, x):
         if not isinstance(x, (int, float)):
@@ -237,6 +280,7 @@ class ExplosionsDetector:
                 distance = math.sqrt((explosion.x - target.x)**2 + (explosion.y - target.y)**2)
                 if distance < explosion.radius + COLLISION_DISTANCE:
                     target.is_alive = False
+                    # Add explosion effect when UFO is hit
                     self.explosions.append(Explosion(target.x, target.y))
                     return True
         return False
@@ -254,6 +298,9 @@ class Game:
         self.meteor_exexplosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.bases + self.cities)
         self.score = 0
         self.game_over = False
+        self.ufo_manager = UFOManger()
+        self.missile_ufo_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.ufo_manager.ufos)
+        self.meteor_ufo_explosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.ufo_manager.ufos)
 
     def update(self):
         if self.game_over:
@@ -271,6 +318,15 @@ class Game:
         is_collision = self.meteor_exexplosions_detector.check_collisions()
         if is_collision:
             self.score -= 5
+
+        self.ufo_manager.update()
+        is_ufo_collision = self.missile_ufo_explosions_detector.check_collisions()
+        if is_ufo_collision:
+            self.score += 10
+
+        is_meteor_ufo_collision = self.meteor_ufo_explosions_detector.check_collisions()
+        if is_meteor_ufo_collision:
+            self.score += 10
 
         self.check_game_over()
 
@@ -290,6 +346,7 @@ class Game:
             city.draw()
         self.meteor_manager.draw()
         self.missile_manager.draw()
+        self.ufo_manager.draw()
 
         pyxel.text(SCORE_TEXT_X, SCORE_TEXT_Y, f"SCORE: {self.score}", SCORE_TEXT_COLOR)
 

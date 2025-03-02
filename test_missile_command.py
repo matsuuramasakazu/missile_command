@@ -3,8 +3,8 @@ import pyxel
 import math
 import random
 from unittest.mock import patch
-from missile_command import *
-from constants import * # Import constants
+from missile_command import Base, City, Meteor, Missile, Explosion, MeteorManager, MissileManager, Game, ExplosionsDetector, UFO, UFOManger
+from constants import *
 
 
 class TestBase(unittest.TestCase):
@@ -35,7 +35,6 @@ class TestMeteor(unittest.TestCase):
         self.assertEqual(meteor.speed, 3)
         self.assertTrue(meteor.is_alive)
 
-
     @patch('missile_command.Meteor._check_base_collision')
     def test_meteor_update_base_collision(self, mock_check_base_collision):
         bases = [Base(100)]
@@ -54,7 +53,7 @@ class TestMeteor(unittest.TestCase):
         cities = [City(100)]
         explosions = []
         score = 100
-        meteor = Meteor(100, CITY_Y-4, 1)
+        meteor = Meteor(100, CITY_Y - 4, 1)
         mock_check_base_collision.return_value = (score - 5, explosions)
         score, explosions = meteor.update(bases, cities, explosions, score)
         self.assertEqual(mock_check_base_collision.call_count, 1)
@@ -76,7 +75,7 @@ class TestMeteor(unittest.TestCase):
         cities = [City(100)]
         explosions = []
         score = 100
-        meteor = Meteor(100, CITY_Y-4, 1)
+        meteor = Meteor(100, CITY_Y - 4, 1)
         score, explosions = meteor._check_city_collision(cities, explosions, score)
         self.assertFalse(meteor.is_alive)
         self.assertFalse(cities[0].is_alive)
@@ -118,6 +117,7 @@ class TestMeteor(unittest.TestCase):
         self.assertAlmostEqual(meteor.x, 10 + 3 * math.cos(math.radians(45)))
         self.assertAlmostEqual(meteor.y, 20 + 3 * math.sin(math.radians(45)))
 
+
 class TestMissile(unittest.TestCase):
     def test_missile_creation(self):
         base = Base(100)
@@ -126,7 +126,7 @@ class TestMissile(unittest.TestCase):
         self.assertEqual(missile.start_y, BASE_Y)
         self.assertEqual(missile.target_x, 200)
         self.assertEqual(missile.target_y, 100)
-        self.assertEqual(missile.speed, MISSILE_SPEED) # Use constant from constants.py
+        self.assertEqual(missile.speed, MISSILE_SPEED)
         self.assertTrue(missile.is_alive)
         self.assertIsNone(missile.explosion)
 
@@ -136,6 +136,7 @@ class TestMissile(unittest.TestCase):
         missile.update()
         self.assertFalse(missile.is_alive)
         self.assertIsNotNone(missile.explosion)
+
 
 class TestExplosion(unittest.TestCase):
     def test_explosion_creation(self):
@@ -148,7 +149,7 @@ class TestExplosion(unittest.TestCase):
         self.assertTrue(explosion.is_alive)
 
     def test_explosion_update(self):
-        explosion = Explosion(10,20)
+        explosion = Explosion(10, 20)
         explosion.update()
         self.assertEqual(explosion.radius, 1.5)
         self.assertEqual(explosion.duration, 19)
@@ -161,6 +162,7 @@ class TestExplosion(unittest.TestCase):
 
 class TestGame(unittest.TestCase):
     _is_pyxel_initialized = False
+
     def setUp(self):
         if TestGame._is_pyxel_initialized == False:
             pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
@@ -197,6 +199,7 @@ class TestGame(unittest.TestCase):
         self.game.check_game_over()
         self.assertFalse(self.game.game_over)
 
+
 class TestMeteorManager(unittest.TestCase):
     def setUp(self):
         if TestGame._is_pyxel_initialized == False:
@@ -212,10 +215,11 @@ class TestMeteorManager(unittest.TestCase):
     @patch('missile_command.random.uniform')
     def test_update_meteor_spawn(self, mock_uniform, mock_randint):
         mock_uniform.return_value = 0  # Any value within -METEOR_ANGLE_RANGE to METEOR_ANGLE_RANGE
-        mock_randint.return_value = 100 # Any value between 0 and SCREEN_WIDTH
+        mock_randint.return_value = 100  # Any value between 0 and SCREEN_WIDTH
 
         self.manager.update(0)
         self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)
+
 
 class TestMissileManager(unittest.TestCase):
     def setUp(self):
@@ -241,11 +245,14 @@ class TestMissileManager(unittest.TestCase):
         nearest_base = self.manager.find_nearest_base(BASE_X_POSITIONS[0] + 10)
         self.assertIsNone(nearest_base)
 
+
 class TestExplosionsDetector(unittest.TestCase):
     def setUp(self):
         self.meteor_manager = MeteorManager([], [])
         self.missile_manager = MissileManager([])
-        self.detector = ExplosionsDetector(self.missile_manager.explosions, self.meteor_manager.meteors)
+        self.detector = ExplosionsDetector(
+            self.missile_manager.explosions, self.meteor_manager.meteors
+        )
 
     def test_check_collisions_true(self):
         explosion = Explosion(100, 100)
@@ -255,6 +262,7 @@ class TestExplosionsDetector(unittest.TestCase):
         self.meteor_manager.meteors.append(meteor)
         is_collision = self.detector.check_collisions()
         self.assertTrue(is_collision)
+        self.assertFalse(meteor.is_alive)
 
     def test_check_collisions_false(self):
         explosion = Explosion(100, 100)
@@ -265,6 +273,61 @@ class TestExplosionsDetector(unittest.TestCase):
         self.meteor_manager.meteors.append(meteor)
         is_collision = self.detector.check_collisions()
         self.assertFalse(is_collision)
+
+    def test_check_collisions_ufo(self):
+        explosion = Explosion(100, 100)
+        explosion.radius = 10
+        ufo = UFO(105, 105)
+        self.missile_manager.explosions.append(explosion)
+        self.detector.targets = [ufo]  # Check against UFOs
+        is_collision = self.detector.check_collisions()
+        self.assertTrue(is_collision)
+        self.assertFalse(ufo.is_alive)
+
+class TestUFO(unittest.TestCase):
+    def test_ufo_creation(self):
+        ufo = UFO(100, 50)
+        self.assertEqual(ufo.x, 100)
+        self.assertEqual(ufo.y, 50)
+        self.assertTrue(ufo.is_alive)
+
+    def test_ufo_update(self):
+        ufo = UFO(100, 50)
+        ufo.update()
+        self.assertEqual(ufo.x, 100 - UFO_SPEED)
+        ufo.x = -UFO_WIDTH - 1
+        ufo.update()
+        self.assertFalse(ufo.is_alive)
+
+
+class TestUFOManger(unittest.TestCase):
+    def setUp(self):
+        if TestGame._is_pyxel_initialized == False:
+            pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
+            TestGame._is_pyxel_initialized = True
+
+    @patch('pyxel.frame_count', 0)
+    @patch('missile_command.random.randint')
+    @patch('missile_command.random.uniform')
+    def test_update_spawn(self, mock_uniform, mock_randint):
+        mock_uniform.return_value = 120
+        mock_randint.return_value = 200
+
+        self.ufo_manager = UFOManger()
+        pyxel.frame_count = 121
+        self.ufo_manager.update()
+        self.assertEqual(len(self.ufo_manager.ufos), 1)
+        self.assertEqual(self.ufo_manager.ufos[0].y, 200)
+
+    @patch('pyxel.frame_count', 0)
+    @patch('missile_command.random.uniform')
+    def test_update_no_spawn(self, mock_uniform):
+        mock_uniform.return_value = 120
+        self.ufo_manager = UFOManger()
+        pyxel.frame_count = 119
+        self.ufo_manager.update()
+        self.assertEqual(len(self.ufo_manager.ufos), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
