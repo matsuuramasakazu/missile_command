@@ -163,17 +163,114 @@ class TestExplosion(unittest.TestCase):
             explosion.update()
         self.assertFalse(explosion.is_alive)
 
-# Integration test - needs pyxel to be installed
-class TestApp(unittest.TestCase):
-    def test_app_reset(self):
-        app = App()  # Initialize with pyxel
-        self.assertEqual(len(app.bases), 3)
-        self.assertEqual(len(app.cities), 6)
-        app.reset()
-        self.assertEqual(len(app.bases), 3)
-        self.assertEqual(len(app.cities), 6)
-        self.assertEqual(app.score, 0)
-        self.assertFalse(app.game_over)
+
+class TestGame(unittest.TestCase):
+    def setUp(self):
+        self.game = Game()
+
+    def test_reset(self):
+        self.game.reset()
+        self.assertEqual(len(self.game.bases), 3)
+        self.assertEqual(len(self.game.cities), 6)
+        self.assertEqual(self.game.score, 0)
+        self.assertFalse(self.game.game_over)
+
+    @patch('missile_command.Game.find_nearest_base')
+    def test_update_missile_launch(self, mock_find_nearest_base):
+        mock_base = Base(100)
+        mock_find_nearest_base.return_value = mock_base
+        pyxel.mouse_x = 200
+        pyxel.mouse_y = 150
+
+        # Simulate a mouse click
+        with patch('pyxel.btnp', return_value=True):
+            self.game.update()
+            self.assertEqual(len(self.game.missile_manager.missiles), 1)
+
+    def test_check_game_over_true(self):
+        self.game.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.game.cities = [City(x) for x in CITY_X_POSITIONS]
+        for base in self.game.bases:
+            base.is_alive = False
+        for city in self.game.cities:
+            city.is_alive = False
+        self.game.check_game_over()
+        self.assertTrue(self.game.game_over)
+
+    def test_check_game_over_false(self):
+        self.game.check_game_over()
+        self.assertFalse(self.game.game_over)
+
+class TestMeteorManager(unittest.TestCase):
+    def setUp(self):
+        self.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.cities = [City(x) for x in CITY_X_POSITIONS]
+        self.manager = MeteorManager(self.bases, self.cities)
+
+    @patch('missile_command.random.randint')
+    @patch('missile_command.random.uniform')
+    def test_update_meteor_spawn(self, mock_uniform, mock_randint):
+        mock_uniform.return_value = 0
+        mock_randint.return_value = 100
+
+        # Simulate meteor spawn interval
+        with patch('pyxel.frame_count', return_value=METEOR_SPAWN_INTERVAL):
+            self.manager.update(0)
+            self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)
+
+    def test_check_ground_hit(self):
+        meteor_x = self.bases[0].x
+        self.manager.check_ground_hit(meteor_x)
+        self.assertFalse(self.bases[0].is_alive)
+
+class TestMissileManager(unittest.TestCase):
+    def setUp(self):
+        self.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.manager = MissileManager(self.bases)
+
+    @patch('missile_command.Missile')
+    def test_update_missile_launch(self, MockMissile):
+        # Simulate a mouse click
+        with patch('pyxel.btnp', return_value=True):
+            pyxel.mouse_x = 100
+            pyxel.mouse_y = 200
+            self.manager.update()
+            self.assertEqual(MockMissile.call_count, 1)
+
+    def test_find_nearest_base(self):
+        nearest_base = self.manager.find_nearest_base(BASE_X_POSITIONS[0] + 10)
+        self.assertEqual(nearest_base.x, BASE_X_POSITIONS[0])
+
+    def test_find_nearest_base_no_alive_bases(self):
+        for base in self.bases:
+            base.is_alive = False
+        nearest_base = self.manager.find_nearest_base(BASE_X_POSITIONS[0] + 10)
+        self.assertIsNone(nearest_base)
+
+class TestCollisionDetector(unittest.TestCase):
+    def setUp(self):
+        self.meteor_manager = MeteorManager([], [])
+        self.missile_manager = MissileManager([])
+        self.detector = CollisionDetector(self.meteor_manager, self.missile_manager)
+
+    def test_check_collisions_true(self):
+        explosion = Explosion(100, 100)
+        explosion.radius = 10
+        meteor = Meteor(105, 105, 5)
+        self.missile_manager.explosions.append(explosion)
+        self.meteor_manager.meteors.append(meteor)
+        is_collision, _ = self.detector.check_collisions()
+        self.assertTrue(is_collision)
+
+    def test_check_collisions_false(self):
+        explosion = Explosion(100, 100)
+        explosion.radius = 1
+        meteor = Meteor(110, 110, 5)
+
+        self.missile_manager.explosions.append(explosion)
+        self.meteor_manager.meteors.append(meteor)
+        is_collision, _ = self.detector.check_collisions()
+        self.assertFalse(is_collision)
 
 if __name__ == "__main__":
     unittest.main()

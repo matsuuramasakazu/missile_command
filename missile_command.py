@@ -130,37 +130,19 @@ class Explosion:
         if self.is_alive:
             pyxel.circ(self.x, self.y, self.radius, EXPLOSION_COLOR)
 
-class App:
-    def __init__(self):
-        pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
-        pyxel.load("my_resource.pyxres") # リソースファイル読み込み
-        self.reset() # ゲーム状態をリセット
-        pyxel.mouse(True) # マウスポインタ表示
-
-    def run(self):
-        pyxel.run(self.update, self.draw)
-
-    def reset(self):
-        self.bases = [Base(x) for x in BASE_X_POSITIONS]
-        self.cities = [City(x) for x in CITY_X_POSITIONS]
+class MeteorManager:
+    def __init__(self, bases, cities):
+        self.bases = bases
+        self.cities = cities
         self.meteors = []
-        self.missiles = []
         self.explosions = []
-        self.score = 0
-        self.game_over = False
 
-
-    def update(self):
-        if self.game_over:
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.KEY_SPACE):
-                self.reset() # ゲームリセット処理を呼び出す
-            return
-
+    def update(self, score):
         if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
             for _ in range(METEOR_SPAWN_COUNT):
                 angle = random.uniform(-METEOR_ANGLE_RANGE, METEOR_ANGLE_RANGE)
                 meteor_x = random.randint(0, SCREEN_WIDTH)
-                meteor_speed = random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX)/2
+                meteor_speed = random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX) / 2
                 meteor = Meteor(meteor_x, METEOR_INITIAL_Y, meteor_speed)
                 meteor.angle = angle
 
@@ -171,32 +153,130 @@ class App:
 
         updated_meteors = []
         for meteor in self.meteors:
-            prev_score = self.score
-            self.score, self.explosions = meteor.update(self.bases, self.cities, self.explosions, self.score)
+            prev_score = score
+            score, self.explosions = meteor.update(self.bases, self.cities, self.explosions, score)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
-            elif self.score == prev_score and meteor.y >= GRAND_Y:
+            elif score == prev_score and meteor.y >= GRAND_Y:
                 self.explosions.append(Explosion(meteor.x, GRAND_Y))
                 self.check_ground_hit(meteor.x)
         self.meteors = updated_meteors
+        return score
 
+    def check_ground_hit(self, meteor_x):
+        for base in self.bases:
+            if base.is_alive and abs(base.x - meteor_x) < GROUND_HIT_DISTANCE:
+                base.is_alive = False
+        for city in self.cities:
+            if city.is_alive and abs(city.x - meteor_x) < GROUND_HIT_DISTANCE:
+                city.is_alive = False
 
-        # Update and remove dead missiles and explosions
-        for entity_list in [self.missiles, self.explosions]:
-            updated_entities = []
-            for entity in entity_list:
-                entity.update()
-                if entity.is_alive:
-                    updated_entities.append(entity)
-            entity_list[:] = updated_entities
+    def draw(self):
+        for meteor in self.meteors:
+            meteor.draw()
+        for explosion in self.explosions:
+            explosion.draw()
 
+class MissileManager:
+    def __init__(self, bases):
+        self.bases = bases
+        self.missiles = []
+        self.explosions = []
+
+    def update(self):
         if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
             if any(base.is_alive for base in self.bases):
                 nearest_base = self.find_nearest_base(pyxel.mouse_x)
                 if nearest_base:
                     self.missiles.append(Missile(nearest_base, pyxel.mouse_x, pyxel.mouse_y))
 
-        self.check_collisions()
+        updated_missiles = []
+        for missile in self.missiles:
+            missile.update()
+            if missile.is_alive:
+                updated_missiles.append(missile)
+            elif missile.explosion:
+                self.explosions.append(missile.explosion)
+        self.missiles = updated_missiles
+
+        updated_explosions = []
+        for explosion in self.explosions:
+            explosion.update()
+            if explosion.is_alive:
+                updated_explosions.append(explosion)
+        self.explosions = updated_explosions
+
+    def find_nearest_base(self, mouse_x):
+        alive_bases = [base for base in self.bases if base.is_alive]
+        if not alive_bases:
+            return None
+
+        nearest_base = None
+        min_distance = float('inf')
+        for base in alive_bases:
+            distance = abs(base.x - mouse_x)
+            if distance < min_distance:
+                min_distance = distance
+                nearest_base = base
+        return nearest_base
+
+    def draw(self):
+        for missile in self.missiles:
+            missile.draw()
+        for explosion in self.explosions:
+            explosion.draw()
+
+class CollisionDetector:
+    def __init__(self, meteor_manager, missile_manager):
+        self.meteor_manager = meteor_manager
+        self.missile_manager = missile_manager
+
+    def check_collisions(self):
+        for explosion in self.missile_manager.explosions:
+            if not explosion.is_alive:
+                continue
+            for meteor in self.meteor_manager.meteors:
+                if not meteor.is_alive:
+                    continue
+                distance = math.sqrt((explosion.x - meteor.x)**2 + (explosion.y - meteor.y)**2)
+                if distance < explosion.radius + COLLISION_DISTANCE:
+                    meteor.is_alive = False
+                    self.missile_manager.explosions.append(Explosion(meteor.x, meteor.y))
+                    return True, meteor
+        return False, None
+
+class Game:
+    def __init__(self):
+        pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
+        pyxel.load("my_resource.pyxres")
+        self.reset()
+        pyxel.mouse(True)
+
+    def run(self):
+        pyxel.run(self.update, self.draw)
+
+    def reset(self):
+        self.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.cities = [City(x) for x in CITY_X_POSITIONS]
+        self.meteor_manager = MeteorManager(self.bases, self.cities)
+        self.missile_manager = MissileManager(self.bases)
+        self.collision_detector = CollisionDetector(self.meteor_manager, self.missile_manager)
+        self.score = 0
+        self.game_over = False
+
+    def update(self):
+        if self.game_over:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.KEY_SPACE):
+                self.reset()
+            return
+
+        self.score = self.meteor_manager.update(self.score)
+        self.missile_manager.update()
+
+        is_collision, meteor = self.collision_detector.check_collisions()
+        if is_collision:
+            self.score += 5
+
         self.check_game_over()
 
     def check_ground_hit(self, meteor_x):
@@ -221,20 +301,6 @@ class App:
                 nearest_base = base
         return nearest_base
 
-    def check_collisions(self):
-        for explosion in self.explosions:
-            if not explosion.is_alive:
-                continue
-            for meteor in self.meteors:
-                if not meteor.is_alive:
-                    continue
-                distance = math.sqrt((explosion.x - meteor.x)**2 + (explosion.y - meteor.y)**2)
-                if distance < explosion.radius + COLLISION_DISTANCE:
-                    meteor.is_alive = False
-                    self.score += 5
-                    self.meteors.remove(meteor)
-                    self.explosions.append(Explosion(meteor.x, meteor.y))
-
     def check_game_over(self):
         if not any(city.is_alive for city in self.cities) or not any(base.is_alive for base in self.bases):
             self.game_over = True
@@ -249,18 +315,21 @@ class App:
             base.draw()
         for city in self.cities:
             city.draw()
-        for meteor in self.meteors:
-            meteor.draw()
-        for missile in self.missiles:
-            missile.draw()
-        for explosion in self.explosions:
-            explosion.draw()
+        self.meteor_manager.draw()
+        self.missile_manager.draw()
 
         pyxel.text(SCORE_TEXT_X, SCORE_TEXT_Y, f"SCORE: {self.score}", SCORE_TEXT_COLOR)
 
         if self.game_over:
             pyxel.text(pyxel.width // 2 - GAME_OVER_TEXT_X_OFFSET, pyxel.height // 2 - GAME_OVER_TEXT_Y_OFFSET, "GAME OVER", GAME_OVER_TEXT_COLOR)
             pyxel.text(pyxel.width // 2 - RETRY_TEXT_X_OFFSET, pyxel.height // 2 + RETRY_TEXT_Y_OFFSET, "CLICK or SPACE to RETRY", RETRY_TEXT_COLOR)
+
+class App:
+    def __init__(self):
+        self.game = Game()
+
+    def run(self):
+        pyxel.run(self.game.update, self.game.draw)
 
 if __name__ == "__main__":
     app = App()
