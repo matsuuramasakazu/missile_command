@@ -247,13 +247,7 @@ class CollisionDetector:
 
 class Game:
     def __init__(self):
-        pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
-        pyxel.load("my_resource.pyxres")
         self.reset()
-        pyxel.mouse(True)
-
-    def run(self):
-        pyxel.run(self.update, self.draw)
 
     def reset(self):
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
@@ -324,13 +318,9 @@ class Game:
             pyxel.text(pyxel.width // 2 - GAME_OVER_TEXT_X_OFFSET, pyxel.height // 2 - GAME_OVER_TEXT_Y_OFFSET, "GAME OVER", GAME_OVER_TEXT_COLOR)
             pyxel.text(pyxel.width // 2 - RETRY_TEXT_X_OFFSET, pyxel.height // 2 + RETRY_TEXT_Y_OFFSET, "CLICK or SPACE to RETRY", RETRY_TEXT_COLOR)
 
-class App:
-    def __init__(self):
-        self.game = Game()
-
-    def run(self):
-        pyxel.run(self.game.update, self.game.draw)
-
 if __name__ == "__main__":
-    app = App()
-    app.run()
+    pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
+    pyxel.load("my_resource.pyxres")
+    pyxel.mouse(True)
+    game = Game()
+    pyxel.run(game.update, game.draw)

@@ -165,7 +165,12 @@ class TestExplosion(unittest.TestCase):
 
 
 class TestGame(unittest.TestCase):
+    _is_pyxel_initialized = False
     def setUp(self):
+        if TestGame._is_pyxel_initialized == False:
+            pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
+            TestGame._is_pyxel_initialized = True
+
         self.game = Game()
 
     def test_reset(self):
@@ -176,20 +181,20 @@ class TestGame(unittest.TestCase):
         self.assertFalse(self.game.game_over)
 
     @patch('missile_command.Game.find_nearest_base')
-    def test_update_missile_launch(self, mock_find_nearest_base):
+    @patch('pyxel.btnp')
+    @patch('pyxel.frame_count')
+    def test_update_missile_launch(self, mock_find_nearest_base, mock_btnp, mock_frame_count):
         mock_base = Base(100)
         mock_find_nearest_base.return_value = mock_base
+        mock_btnp.return_value = True
+        mock_frame_count.return_value = 0
         pyxel.mouse_x = 200
         pyxel.mouse_y = 150
 
-        # Simulate a mouse click
-        with patch('pyxel.btnp', return_value=True):
-            self.game.update()
-            self.assertEqual(len(self.game.missile_manager.missiles), 1)
+        self.game.update()
+        self.assertEqual(len(self.game.missile_manager.missiles), 1)
 
     def test_check_game_over_true(self):
-        self.game.bases = [Base(x) for x in BASE_X_POSITIONS]
-        self.game.cities = [City(x) for x in CITY_X_POSITIONS]
         for base in self.game.bases:
             base.is_alive = False
         for city in self.game.cities:
@@ -203,20 +208,23 @@ class TestGame(unittest.TestCase):
 
 class TestMeteorManager(unittest.TestCase):
     def setUp(self):
+        if TestGame._is_pyxel_initialized == False:
+            pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
+            TestGame._is_pyxel_initialized = True
+
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
         self.cities = [City(x) for x in CITY_X_POSITIONS]
         self.manager = MeteorManager(self.bases, self.cities)
 
+    @patch('pyxel.frame_count', METEOR_SPAWN_INTERVAL)
     @patch('missile_command.random.randint')
     @patch('missile_command.random.uniform')
     def test_update_meteor_spawn(self, mock_uniform, mock_randint):
-        mock_uniform.return_value = 0
-        mock_randint.return_value = 100
+        mock_uniform.return_value = 0  # Any value within -METEOR_ANGLE_RANGE to METEOR_ANGLE_RANGE
+        mock_randint.return_value = 100 # Any value between 0 and SCREEN_WIDTH
 
-        # Simulate meteor spawn interval
-        with patch('pyxel.frame_count', return_value=METEOR_SPAWN_INTERVAL):
-            self.manager.update(0)
-            self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)
+        self.manager.update(0)
+        self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)
 
     def test_check_ground_hit(self):
         meteor_x = self.bases[0].x
