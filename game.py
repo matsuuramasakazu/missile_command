@@ -1,0 +1,77 @@
+import pyxel
+from constants import *
+from base import Base
+from city import City
+from meteor_manager import MeteorManager
+from missile_manager import MissileManager
+from explosions_detector import ExplosionsDetector
+from ufo_manager import UFOManger
+
+class Game:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.bases = [Base(x) for x in BASE_X_POSITIONS]
+        self.cities = [City(x) for x in CITY_X_POSITIONS]
+        self.meteor_manager = MeteorManager(self.bases, self.cities)
+        self.missile_manager = MissileManager(self.bases)
+        self.missile_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.meteor_manager.meteors)
+        self.meteor_exexplosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.bases + self.cities)
+        self.score = 0
+        self.game_over = False
+        self.ufo_manager = UFOManger()
+        self.missile_ufo_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.ufo_manager.ufos)
+        self.meteor_ufo_explosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.ufo_manager.ufos)
+
+    def update(self):
+        if self.game_over:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.KEY_SPACE):
+                self.reset()
+            return
+
+        self.score = self.meteor_manager.update(self.score)
+        self.missile_manager.update()
+
+        is_collision = self.missile_explosions_detector.check_collisions()
+        if is_collision:
+            self.score += 5
+
+        is_collision = self.meteor_exexplosions_detector.check_collisions()
+        if is_collision:
+            self.score -= 5
+
+        self.ufo_manager.update()
+        is_ufo_collision = self.missile_ufo_explosions_detector.check_collisions()
+        if is_ufo_collision:
+            self.score += 10
+
+        is_meteor_ufo_collision = self.meteor_ufo_explosions_detector.check_collisions()
+        if is_meteor_ufo_collision:
+            self.score += 10
+
+        self.check_game_over()
+
+    def check_game_over(self):
+        if not any(city.is_alive for city in self.cities) or not any(base.is_alive for base in self.bases):
+            self.game_over = True
+        else:
+            self.game_over = False
+
+    def draw(self):
+        pyxel.cls(0)
+        pyxel.rect(0, GRAND_Y, SCREEN_WIDTH, SCREEN_HEIGHT - GRAND_Y, GROUND_COLOR)
+
+        for base in self.bases:
+            base.draw()
+        for city in self.cities:
+            city.draw()
+        self.meteor_manager.draw()
+        self.missile_manager.draw()
+        self.ufo_manager.draw()
+
+        pyxel.text(SCORE_TEXT_X, SCORE_TEXT_Y, f"SCORE: {self.score}", SCORE_TEXT_COLOR)
+
+        if self.game_over:
+            pyxel.text(pyxel.width // 2 - GAME_OVER_TEXT_X_OFFSET, pyxel.height // 2 - GAME_OVER_TEXT_Y_OFFSET, "GAME OVER", GAME_OVER_TEXT_COLOR)
+            pyxel.text(pyxel.width // 2 - RETRY_TEXT_X_OFFSET, pyxel.height // 2 + RETRY_TEXT_Y_OFFSET, "CLICK or SPACE to RETRY", RETRY_TEXT_COLOR)

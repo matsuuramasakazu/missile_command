@@ -3,7 +3,17 @@ import pyxel
 import math
 import random
 from unittest.mock import patch
-from missile_command import Base, City, Meteor, Missile, Explosion, MeteorManager, MissileManager, Game, ExplosionsDetector, UFO, UFOManger
+from base import Base
+from city import City
+from meteor import Meteor
+from missile import Missile
+from explosion import Explosion
+from meteor_manager import MeteorManager
+from missile_manager import MissileManager
+from game import Game
+from explosions_detector import ExplosionsDetector
+from ufo import UFO
+from ufo_manager import UFOManger
 from constants import *
 
 
@@ -226,14 +236,13 @@ class TestMissileManager(unittest.TestCase):
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
         self.manager = MissileManager(self.bases)
 
-    @patch('missile_command.Missile')
-    def test_update_missile_launch(self, MockMissile):
-        # Simulate a mouse click
-        with patch('pyxel.btnp', return_value=True):
-            pyxel.mouse_x = 100
-            pyxel.mouse_y = 200
-            self.manager.update()
-            self.assertEqual(MockMissile.call_count, 1)
+    @patch('pyxel.btnp')
+    def test_update_missile_launch(self, mock_btnp):
+        mock_btnp.return_value = True
+        pyxel.mouse_x = BASE_X_POSITIONS[0]
+        pyxel.mouse_y = 200
+        self.manager.update()
+        self.assertEqual(len(self.manager.missiles), 1)
 
     def test_find_nearest_base(self):
         nearest_base = self.manager.find_nearest_base(BASE_X_POSITIONS[0] + 10)
