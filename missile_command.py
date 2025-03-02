@@ -273,28 +273,6 @@ class Game:
 
         self.check_game_over()
 
-    def check_ground_hit(self, meteor_x):
-        for base in self.bases:
-            if base.is_alive and abs(base.x - meteor_x) < GROUND_HIT_DISTANCE:
-                base.is_alive = False
-        for city in self.cities:
-            if city.is_alive and abs(city.x- meteor_x) < GROUND_HIT_DISTANCE:
-                city.is_alive = False
-
-    def find_nearest_base(self, mouse_x):
-        alive_bases = [base for base in self.bases if base.is_alive]
-        if not alive_bases:
-            return None
-
-        nearest_base = None
-        min_distance = float('inf')
-        for base in alive_bases:
-            distance = abs(base.x - mouse_x)
-            if distance < min_distance:
-                min_distance = distance
-                nearest_base = base
-        return nearest_base
-
     def check_game_over(self):
         if not any(city.is_alive for city in self.cities) or not any(base.is_alive for base in self.bases):
             self.game_over = True

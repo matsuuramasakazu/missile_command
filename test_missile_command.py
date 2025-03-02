@@ -37,33 +37,30 @@ class TestMeteor(unittest.TestCase):
 
 
     @patch('missile_command.Meteor._check_base_collision')
-    @patch('missile_command.Explosion')
-    def test_meteor_update_base_collision(self, MockExplosion, MockCheckBaseCollision):
+    def test_meteor_update_base_collision(self, mock_check_base_collision):
         bases = [Base(100)]
         cities = []
         explosions = []
         score = 100
         meteor = Meteor(100, BASE_Y - 4, 1)
-        MockCheckBaseCollision.return_value = (score - 10, explosions)
+        mock_check_base_collision.return_value = (score - 10, explosions)
         score, explosions = meteor.update(bases, cities, explosions, score)
-        self.assertEqual(MockCheckBaseCollision.call_count, 1)
+        self.assertEqual(mock_check_base_collision.call_count, 1)
         self.assertEqual(score, 90)
 
     @patch('missile_command.Meteor._check_city_collision')
-    @patch('missile_command.Explosion')
-    def test_meteor_update_city_collision(self, MockExplosion, MockCheckCityCollision):
+    def test_meteor_update_city_collision(self, mock_check_base_collision):
         bases = []
         cities = [City(100)]
         explosions = []
         score = 100
         meteor = Meteor(100, CITY_Y-4, 1)
-        MockCheckCityCollision.return_value = (score - 5, explosions)
+        mock_check_base_collision.return_value = (score - 5, explosions)
         score, explosions = meteor.update(bases, cities, explosions, score)
-        self.assertEqual(MockCheckCityCollision.call_count, 1)
+        self.assertEqual(mock_check_base_collision.call_count, 1)
         self.assertEqual(score, 95)
 
-    @patch('missile_command.Explosion')
-    def test_meteor_check_base_collision(self, MockExplosion):
+    def test_meteor_check_base_collision(self):
         bases = [Base(100)]
         explosions = []
         score = 100
@@ -74,8 +71,7 @@ class TestMeteor(unittest.TestCase):
         self.assertEqual(len(explosions), 1)
         self.assertEqual(score, 90)
 
-    @patch('missile_command.Explosion')
-    def test_meteor_check_city_collision(self, MockExplosion):
+    def test_meteor_check_city_collision(self):
         bases = []
         cities = [City(100)]
         explosions = []
@@ -134,8 +130,7 @@ class TestMissile(unittest.TestCase):
         self.assertTrue(missile.is_alive)
         self.assertIsNone(missile.explosion)
 
-    @patch('missile_command.Explosion')
-    def test_missile_update_reach_target(self, MockExplosion):
+    def test_missile_update_reach_target(self):
         base = Base(100)
         missile = Missile(base, 105, BASE_Y)
         missile.update()
@@ -180,14 +175,10 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.score, 0)
         self.assertFalse(self.game.game_over)
 
-    @patch('missile_command.Game.find_nearest_base')
+    @patch('pyxel.frame_count', 0)
     @patch('pyxel.btnp')
-    @patch('pyxel.frame_count')
-    def test_update_missile_launch(self, mock_find_nearest_base, mock_btnp, mock_frame_count):
-        mock_base = Base(100)
-        mock_find_nearest_base.return_value = mock_base
+    def test_update_missile_launch(self, mock_btnp):
         mock_btnp.return_value = True
-        mock_frame_count.return_value = 0
         pyxel.mouse_x = 200
         pyxel.mouse_y = 150
 
