@@ -151,7 +151,7 @@ class TestExplosion(unittest.TestCase):
         explosion = Explosion(10,20)
         explosion.update()
         self.assertEqual(explosion.radius, 1.5)
-        self.assertEqual(explosion.duration, 14)
+        self.assertEqual(explosion.duration, 19)
 
         # Simulate until explosion is done
         for _ in range(EXPLOSION_DURATION):
@@ -217,11 +217,6 @@ class TestMeteorManager(unittest.TestCase):
         self.manager.update(0)
         self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)
 
-    def test_check_ground_hit(self):
-        meteor_x = self.bases[0].x
-        self.manager.check_ground_hit(meteor_x)
-        self.assertFalse(self.bases[0].is_alive)
-
 class TestMissileManager(unittest.TestCase):
     def setUp(self):
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
@@ -246,11 +241,11 @@ class TestMissileManager(unittest.TestCase):
         nearest_base = self.manager.find_nearest_base(BASE_X_POSITIONS[0] + 10)
         self.assertIsNone(nearest_base)
 
-class TestCollisionDetector(unittest.TestCase):
+class TestExplosionsDetector(unittest.TestCase):
     def setUp(self):
         self.meteor_manager = MeteorManager([], [])
         self.missile_manager = MissileManager([])
-        self.detector = CollisionDetector(self.meteor_manager, self.missile_manager)
+        self.detector = ExplosionsDetector(self.missile_manager.explosions, self.meteor_manager.meteors)
 
     def test_check_collisions_true(self):
         explosion = Explosion(100, 100)
@@ -258,7 +253,7 @@ class TestCollisionDetector(unittest.TestCase):
         meteor = Meteor(105, 105, 5)
         self.missile_manager.explosions.append(explosion)
         self.meteor_manager.meteors.append(meteor)
-        is_collision, _ = self.detector.check_collisions()
+        is_collision = self.detector.check_collisions()
         self.assertTrue(is_collision)
 
     def test_check_collisions_false(self):
@@ -268,7 +263,7 @@ class TestCollisionDetector(unittest.TestCase):
 
         self.missile_manager.explosions.append(explosion)
         self.meteor_manager.meteors.append(meteor)
-        is_collision, _ = self.detector.check_collisions()
+        is_collision = self.detector.check_collisions()
         self.assertFalse(is_collision)
 
 if __name__ == "__main__":

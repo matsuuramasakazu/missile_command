@@ -37,8 +37,8 @@ class Meteor:
         self._move()
         if self.y >= GRAND_Y:
             self.is_alive = False
-            return score, explosions
-
+            explosions.append(Explosion(self.x, GRAND_Y))  # Add explosion at ground hit
+            
         score, explosions = self._check_base_collision(bases, explosions, score)
         score, explosions = self._check_city_collision(cities, explosions, score)
         
@@ -153,23 +153,19 @@ class MeteorManager:
 
         updated_meteors = []
         for meteor in self.meteors:
-            prev_score = score
             score, self.explosions = meteor.update(self.bases, self.cities, self.explosions, score)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
-            elif score == prev_score and meteor.y >= GRAND_Y:
-                self.explosions.append(Explosion(meteor.x, GRAND_Y))
-                self.check_ground_hit(meteor.x)
-        self.meteors = updated_meteors
-        return score
+        self.meteors[:] = updated_meteors
 
-    def check_ground_hit(self, meteor_x):
-        for base in self.bases:
-            if base.is_alive and abs(base.x - meteor_x) < GROUND_HIT_DISTANCE:
-                base.is_alive = False
-        for city in self.cities:
-            if city.is_alive and abs(city.x - meteor_x) < GROUND_HIT_DISTANCE:
-                city.is_alive = False
+        updated_explosions = []
+        for explosion in self.explosions:
+            explosion.update()
+            if explosion.is_alive:
+                updated_explosions.append(explosion)
+        self.explosions[:] = updated_explosions
+        
+        return score
 
     def draw(self):
         for meteor in self.meteors:
@@ -197,14 +193,14 @@ class MissileManager:
                 updated_missiles.append(missile)
             elif missile.explosion:
                 self.explosions.append(missile.explosion)
-        self.missiles = updated_missiles
+        self.missiles[:] = updated_missiles
 
         updated_explosions = []
         for explosion in self.explosions:
             explosion.update()
             if explosion.is_alive:
                 updated_explosions.append(explosion)
-        self.explosions = updated_explosions
+        self.explosions[:] = updated_explosions
 
     def find_nearest_base(self, mouse_x):
         alive_bases = [base for base in self.bases if base.is_alive]
@@ -226,24 +222,24 @@ class MissileManager:
         for explosion in self.explosions:
             explosion.draw()
 
-class CollisionDetector:
-    def __init__(self, meteor_manager, missile_manager):
-        self.meteor_manager = meteor_manager
-        self.missile_manager = missile_manager
+class ExplosionsDetector:
+    def __init__(self, explosions, targets):
+        self.explosions = explosions
+        self.targets = targets
 
     def check_collisions(self):
-        for explosion in self.missile_manager.explosions:
+        for explosion in self.explosions:
             if not explosion.is_alive:
                 continue
-            for meteor in self.meteor_manager.meteors:
-                if not meteor.is_alive:
+            for target in self.targets:
+                if not target.is_alive:
                     continue
-                distance = math.sqrt((explosion.x - meteor.x)**2 + (explosion.y - meteor.y)**2)
+                distance = math.sqrt((explosion.x - target.x)**2 + (explosion.y - target.y)**2)
                 if distance < explosion.radius + COLLISION_DISTANCE:
-                    meteor.is_alive = False
-                    self.missile_manager.explosions.append(Explosion(meteor.x, meteor.y))
-                    return True, meteor
-        return False, None
+                    target.is_alive = False
+                    self.explosions.append(Explosion(target.x, target.y))
+                    return True
+        return False
 
 class Game:
     def __init__(self):
@@ -254,7 +250,8 @@ class Game:
         self.cities = [City(x) for x in CITY_X_POSITIONS]
         self.meteor_manager = MeteorManager(self.bases, self.cities)
         self.missile_manager = MissileManager(self.bases)
-        self.collision_detector = CollisionDetector(self.meteor_manager, self.missile_manager)
+        self.missile_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.meteor_manager.meteors)
+        self.meteor_exexplosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.bases + self.cities)
         self.score = 0
         self.game_over = False
 
@@ -267,9 +264,13 @@ class Game:
         self.score = self.meteor_manager.update(self.score)
         self.missile_manager.update()
 
-        is_collision, meteor = self.collision_detector.check_collisions()
+        is_collision = self.missile_explosions_detector.check_collisions()
         if is_collision:
             self.score += 5
+
+        is_collision = self.meteor_exexplosions_detector.check_collisions()
+        if is_collision:
+            self.score -= 5
 
         self.check_game_over()
 
