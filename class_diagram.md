@@ -64,20 +64,20 @@ classDiagram
       +draw()
     }
 
-    Game --|> MeteorManager : has
-    Game --|> MissileManager : has
-    Game --|> ExplosionsDetector : has
-    Game --|> Base : has
-    Game --|> City : has
-    Game --|> Meteor : has
-    Game --|> Missile : has
-    Game --|> UFO : has
-    Game --|> UFOManger: has
-    MeteorManager --|> Base : has
-    MeteorManager --|> City : has
-    MissileManager --|> Base : has
-    ExplosionsDetector --|> Explosion : has
-    Meteor --|> City : collides with
-    Meteor --|> Base : collides with
-    Missile --|> Meteor : collides with
+MeteorManager --* Game : has
+MissileManager --* Game : has
+ExplosionsDetector --* Game : has
+Base --* Game : has
+City --* Game : has
+Meteor --* Game : has
+Missile --* Game : has
+UFO --* Game : has
+UFOManger --* Game : has
+Base --* MeteorManager : has
+City --* MeteorManager : has
+Base --* MissileManager : has
+Explosion --* ExplosionsDetector : has
+Meteor -- City : collides with
+Meteor -- Base : collides with
+Missile -- Meteor : collides with
 ```
