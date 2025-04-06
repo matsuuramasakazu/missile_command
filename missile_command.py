@@ -3,7 +3,7 @@ import random
 import math
 from constants import *
 from ufo import UFO
-from ufo_manager import UFOManger
+from ufo_manager import UFOManager
 from base import Base
 from city import City
 from meteor import Meteor

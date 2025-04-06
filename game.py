@@ -5,7 +5,7 @@ from city import City
 from meteor_manager import MeteorManager
 from missile_manager import MissileManager
 from explosions_detector import ExplosionsDetector
-from ufo_manager import UFOManger
+from ufo_manager import UFOManager
 
 class Game:
     def __init__(self):
@@ -17,10 +17,10 @@ class Game:
         self.meteor_manager = MeteorManager(self.bases, self.cities)
         self.missile_manager = MissileManager(self.bases)
         self.missile_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.meteor_manager.meteors)
-        self.meteor_exexplosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.bases + self.cities)
+        self.meteor_explosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.bases + self.cities)
         self.score = 0
         self.game_over = False
-        self.ufo_manager = UFOManger()
+        self.ufo_manager = UFOManager()
         self.missile_ufo_explosions_detector = ExplosionsDetector(self.missile_manager.explosions, self.ufo_manager.ufos)
         self.meteor_ufo_explosions_detector = ExplosionsDetector(self.meteor_manager.explosions, self.ufo_manager.ufos)
 
@@ -43,7 +43,7 @@ class Game:
         if is_collision:
             self.score += 5
 
-        is_collision = self.meteor_exexplosions_detector.check_collisions()
+        is_collision = self.meteor_explosions_detector.check_collisions()
         if is_collision:
             self.score -= 5
 

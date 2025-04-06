@@ -3,7 +3,7 @@ import random
 from constants import *
 from ufo import UFO
 
-class UFOManger:
+class UFOManager:
     def __init__(self):
         self.ufos = []
         self.next_spawn_frame = pyxel.frame_count + random.uniform(UFO_SPAWN_INTERVAL, UFO_SPAWN_INTERVAL * 5)

@@ -9,16 +9,17 @@ class ExplosionsDetector:
         self.targets = targets
 
     def check_collisions(self):
+        collision_detected = False
         for explosion in self.explosions:
             if not explosion.is_alive:
                 continue
             for target in self.targets:
                 if not target.is_alive:
                     continue
-                distance = math.sqrt((explosion.x - target.x)**2 + (explosion.y - target.y)**2)
+                distance = math.hypot(explosion.x - target.x, explosion.y - target.y)
                 if distance < explosion.radius + COLLISION_DISTANCE:
                     target.is_alive = False
                     # Add explosion effect when UFO is hit
                     self.explosions.append(Explosion(target.x, target.y))
-                    return True
-        return False
+                    collision_detected = True
+        return collision_detected

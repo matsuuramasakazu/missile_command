@@ -29,7 +29,7 @@ class Meteor:
 
     def _check_city_collision(self, cities, explosions):
         for city in cities:
-            distance = math.sqrt((self.x - city.x)**2 + (self.y - city.y - CITY_COLLISION_OFFSET)**2)
+            distance = math.hypot(self.x - city.x, self.y - city.y - CITY_COLLISION_OFFSET)
             if city.is_alive and distance <= CITY_IMG_WIDTH // 2:
                 self.is_alive = False
                 city.is_alive = False
@@ -39,7 +39,7 @@ class Meteor:
 
     def _check_base_collision(self, bases, explosions):
         for base in bases:
-            distance = math.sqrt((self.x - base.x)**2 + (self.y - base.y - BASE_COLLISION_OFFSET)**2)
+            distance = math.hypot(self.x - base.x, self.y - base.y - BASE_COLLISION_OFFSET)
             if base.is_alive and distance <= BASE_IMG_WIDTH // 2:
                 self.is_alive = False
                 base.is_alive = False
