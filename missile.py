@@ -2,9 +2,11 @@ import pyxel
 import math
 from constants import *
 from explosion import Explosion
+from game_object import GameObject
 
-class Missile:
+class Missile(GameObject):
     def __init__(self, start_base, target_x, target_y):
+        super().__init__()
         self.start_x = start_base.x
         self.start_y = start_base.y
         self.x = self.start_x
@@ -12,7 +14,6 @@ class Missile:
         self.target_x = target_x
         self.target_y = target_y
         self.speed = MISSILE_SPEED
-        self.is_alive = True
         self.explosion = None
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
 

@@ -1,11 +1,12 @@
 import pyxel
 from constants import *
+from game_object import GameObject
 
-class UFO:
+class UFO(GameObject):
     def __init__(self, x, y):
+        super().__init__()
         self.x = x
         self.y = y
-        self.is_alive = True
 
     def update(self):
         self.x -= UFO_SPEED  # Assuming UFO moves from right to left

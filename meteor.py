@@ -2,13 +2,14 @@ import pyxel
 import math
 from constants import *
 from explosion import Explosion
+from game_object import GameObject
 
-class Meteor:
+class Meteor(GameObject):
     def __init__(self, x, y, speed):
+        super().__init__()
         self.x = x
         self.y = y
         self.speed = speed
-        self.is_alive = True
         self.angle = 0
 
     def update(self, explosions):

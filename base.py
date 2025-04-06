@@ -1,13 +1,14 @@
 import pyxel
 from constants import *
+from game_object import GameObject
 
-class Base:
+class Base(GameObject):
     def __init__(self, x):
+        super().__init__()
         if not isinstance(x, (int, float)):
             raise TypeError("x must be a numeric value")
         self.x = x
         self.y = BASE_Y
-        self.is_alive = True
 
     def draw(self):
         if self.is_alive:

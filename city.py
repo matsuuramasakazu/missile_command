@@ -1,11 +1,12 @@
 import pyxel
 from constants import *
+from game_object import GameObject
 
-class City:
+class City(GameObject):
     def __init__(self, x):
+        super().__init__()
         self.x = x
         self.y = CITY_Y
-        self.is_alive = True
 
     def draw(self):
         if self.is_alive:
