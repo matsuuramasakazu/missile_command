@@ -23,7 +23,8 @@ class UFOManager:
     def spawn_ufo(self):
       # Spawn UFO at a random y position at the right edge of the screen
         y = random.randint(UFO_HEIGHT, UFO_FLYING_HEIGHT_LIMIT)
-        self.ufos.append(UFO(SCREEN_WIDTH, y))
+        zigzag = random.random() < 0.5  # 50%の確率でジグザグ移動
+        self.ufos.append(UFO(SCREEN_WIDTH, y, zigzag=zigzag))
 
     def draw(self):
         for ufo in self.ufos:
