@@ -5,10 +5,10 @@ from missile import Missile
 from explosion import Explosion
 
 class MissileManager:
-    def __init__(self, bases):
+    def __init__(self, bases, explosions):
         self.bases = bases
+        self.explosions = explosions
         self.missiles = []
-        self.explosions = []
 
     def update(self):
         if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):

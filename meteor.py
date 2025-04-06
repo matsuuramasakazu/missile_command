@@ -11,17 +11,11 @@ class Meteor:
         self.is_alive = True
         self.angle = 0
 
-    def update(self, bases, cities, explosions):
+    def update(self, explosions):
         self._move()
-        collisions = {'base': False, 'city': False} # 衝突情報を格納する辞書
         if self.y >= GRAND_Y:
             self.is_alive = False
             explosions.append(Explosion(self.x, GRAND_Y))
-
-        collisions['base'] = self._check_base_collision(bases, explosions)
-        collisions['city'] = self._check_city_collision(cities, explosions)
-
-        return collisions
 
     def _move(self):
         self.y += self.speed * math.sin(math.radians(90 + self.angle))

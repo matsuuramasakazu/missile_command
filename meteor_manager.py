@@ -6,11 +6,11 @@ from meteor import Meteor
 from explosion import Explosion
 
 class MeteorManager:
-    def __init__(self, bases, cities):
+    def __init__(self, bases, cities, explosions):
         self.bases = bases
         self.cities = cities
+        self.explosions = explosions
         self.meteors = []
-        self.explosions = []
 
     def update(self):
         if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
@@ -27,10 +27,8 @@ class MeteorManager:
                 self.meteors.append(meteor)
 
         updated_meteors = []
-        collisions = [] # 全ての隕石の衝突情報を格納
         for meteor in self.meteors:
-            collision_data = meteor.update(self.bases, self.cities, self.explosions)
-            collisions.append(collision_data)
+            meteor.update(self.explosions)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
         self.meteors[:] = updated_meteors
@@ -41,8 +39,6 @@ class MeteorManager:
             if explosion.is_alive:
                 updated_explosions.append(explosion)
         self.explosions[:] = updated_explosions
-        
-        return collisions
 
     def draw(self):
         for meteor in self.meteors:
