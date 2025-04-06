@@ -15,7 +15,7 @@ class TestMeteorManager(unittest.TestCase):
 
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
         self.cities = [City(x) for x in CITY_X_POSITIONS]
-        self.manager = MeteorManager(self.bases, self.cities)
+        self.manager = MeteorManager(self.bases, self.cities, [])
 
     @patch('pyxel.frame_count', METEOR_SPAWN_INTERVAL)
     @patch('meteor_manager.random.randint')
@@ -24,5 +24,5 @@ class TestMeteorManager(unittest.TestCase):
         mock_uniform.return_value = 0  # Any value within -METEOR_ANGLE_RANGE to METEOR_ANGLE_RANGE
         mock_randint.return_value = 100  # Any value between 0 and SCREEN_WIDTH
 
-        self.manager.update(0)
+        self.manager.update()
         self.assertEqual(len(self.manager.meteors), METEOR_SPAWN_COUNT)

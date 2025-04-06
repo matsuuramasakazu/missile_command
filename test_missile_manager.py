@@ -13,7 +13,7 @@ class TestMissileManager(unittest.TestCase):
             TestGame._is_pyxel_initialized = True
 
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
-        self.manager = MissileManager(self.bases)
+        self.manager = MissileManager(self.bases, [])
 
     @patch('pyxel.btnp')
     def test_update_missile_launch(self, mock_btnp):

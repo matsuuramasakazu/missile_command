@@ -10,8 +10,8 @@ from constants import *
 
 class TestExplosionsDetector(unittest.TestCase):
     def setUp(self):
-        self.meteor_manager = MeteorManager([], [])
-        self.missile_manager = MissileManager([])
+        self.meteor_manager = MeteorManager([], [], [])
+        self.missile_manager = MissileManager([], [])
         self.detector = ExplosionsDetector(
             self.missile_manager.explosions, self.meteor_manager.meteors
         )
