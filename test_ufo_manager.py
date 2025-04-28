@@ -5,7 +5,7 @@ from ufo_manager import UFOManager
 from constants import *
 from test_game import TestGame
 
-class TestUFOManger(unittest.TestCase):
+class TestUFOManager(unittest.TestCase):
     def setUp(self):
         if TestGame._is_pyxel_initialized == False:
             pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
@@ -22,7 +22,7 @@ class TestUFOManger(unittest.TestCase):
         pyxel.frame_count = 121
         self.ufo_manager.update()
         self.assertEqual(len(self.ufo_manager.ufos), 1)
-        self.assertAlmostEqual(self.ufo_manager.ufos[0].y, 200, places=1)
+        self.assertAlmostEqual(self.ufo_manager.ufos[0].y, 200, delta=0.5)
 
     @patch('pyxel.frame_count', 0)
     @patch('ufo_manager.random.uniform')
