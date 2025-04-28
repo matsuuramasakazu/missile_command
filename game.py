@@ -12,18 +12,20 @@ class Game:
         self.reset()
 
     def reset(self):
+        self.score = 0
+        self.game_over = False
+
         self.bases = [Base(x) for x in BASE_X_POSITIONS]
         self.cities = [City(x) for x in CITY_X_POSITIONS]
         self.explosions = []  # 共通の爆発リスト
-        self.meteor_manager = MeteorManager(self.bases, self.cities, self.explosions)
+
+        self.meteor_manager = MeteorManager(self.explosions)
         self.missile_manager = MissileManager(self.bases, self.explosions)
+        self.ufo_manager = UFOManager()
+
         self.missile_explosions_detector = ExplosionsDetector(self.explosions, self.meteor_manager.meteors)
         self.meteor_explosions_detector = ExplosionsDetector(self.explosions, self.bases + self.cities)
-        self.score = 0
-        self.game_over = False
-        self.ufo_manager = UFOManager()
         self.missile_ufo_explosions_detector = ExplosionsDetector(self.explosions, self.ufo_manager.ufos)
-        self.meteor_ufo_explosions_detector = ExplosionsDetector(self.explosions, self.ufo_manager.ufos)
 
     def update(self):
         if self.game_over:
@@ -46,10 +48,6 @@ class Game:
         self.ufo_manager.update()
         is_ufo_collision = self.missile_ufo_explosions_detector.check_collisions()
         if is_ufo_collision:
-            self.score += 10
-
-        is_meteor_ufo_collision = self.meteor_ufo_explosions_detector.check_collisions()
-        if is_meteor_ufo_collision:
             self.score += 10
 
         self.check_game_over()

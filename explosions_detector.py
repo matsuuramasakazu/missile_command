@@ -19,7 +19,6 @@ class ExplosionsDetector:
                 distance = math.hypot(explosion.x - target.x, explosion.y - target.y)
                 if distance < explosion.radius + COLLISION_DISTANCE:
                     target.is_alive = False
-                    # Add explosion effect when UFO is hit
                     self.explosions.append(Explosion(target.x, target.y))
                     collision_detected = True
         return collision_detected

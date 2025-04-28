@@ -1,17 +1,5 @@
 import pyxel
-import random
-import math
 from constants import *
-from ufo import UFO
-from ufo_manager import UFOManager
-from base import Base
-from city import City
-from meteor import Meteor
-from missile import Missile
-from explosion import Explosion
-from meteor_manager import MeteorManager
-from missile_manager import MissileManager
-from explosions_detector import ExplosionsDetector
 from game import Game
 
 if __name__ == "__main__":

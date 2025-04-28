@@ -1,5 +1,4 @@
 import unittest
-import pyxel
 from explosions_detector import ExplosionsDetector
 from explosion import Explosion
 from meteor import Meteor
@@ -10,7 +9,7 @@ from constants import *
 
 class TestExplosionsDetector(unittest.TestCase):
     def setUp(self):
-        self.meteor_manager = MeteorManager([], [], [])
+        self.meteor_manager = MeteorManager([])
         self.missile_manager = MissileManager([], [])
         self.detector = ExplosionsDetector(
             self.missile_manager.explosions, self.meteor_manager.meteors

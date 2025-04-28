@@ -2,8 +2,6 @@ import unittest
 import pyxel
 from unittest.mock import patch
 from meteor_manager import MeteorManager
-from base import Base
-from city import City
 from constants import *
 from test_game import TestGame
 
@@ -13,9 +11,7 @@ class TestMeteorManager(unittest.TestCase):
             pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
             TestGame._is_pyxel_initialized = True
 
-        self.bases = [Base(x) for x in BASE_X_POSITIONS]
-        self.cities = [City(x) for x in CITY_X_POSITIONS]
-        self.manager = MeteorManager(self.bases, self.cities, [])
+        self.manager = MeteorManager([])
 
     @patch('pyxel.frame_count', METEOR_SPAWN_INTERVAL)
     @patch('meteor_manager.random.randint')

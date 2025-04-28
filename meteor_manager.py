@@ -6,9 +6,7 @@ from meteor import Meteor
 from explosion import Explosion
 
 class MeteorManager:
-    def __init__(self, bases, cities, explosions):
-        self.bases = bases
-        self.cities = cities
+    def __init__(self, explosions):
         self.explosions = explosions
         self.meteors = []
 
