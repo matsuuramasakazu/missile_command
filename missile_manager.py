@@ -1,8 +1,6 @@
 import pyxel
-import math
 from constants import *
 from missile import Missile
-from explosion import Explosion
 
 class MissileManager:
     def __init__(self, bases, explosions):

@@ -22,26 +22,6 @@ class Meteor(GameObject):
         self.y += self.speed * math.sin(math.radians(90 + self.angle))
         self.x += self.speed * math.cos(math.radians(90 + self.angle))
 
-    def _check_city_collision(self, cities, explosions):
-        for city in cities:
-            distance = math.hypot(self.x - city.x, self.y - city.y - CITY_COLLISION_OFFSET)
-            if city.is_alive and distance <= CITY_IMG_WIDTH // 2:
-                self.is_alive = False
-                city.is_alive = False
-                explosions.append(Explosion(self.x, self.y))
-                return True  # 衝突発生
-        return False  # 衝突なし
-
-    def _check_base_collision(self, bases, explosions):
-        for base in bases:
-            distance = math.hypot(self.x - base.x, self.y - base.y - BASE_COLLISION_OFFSET)
-            if base.is_alive and distance <= BASE_IMG_WIDTH // 2:
-                self.is_alive = False
-                base.is_alive = False
-                explosions.append(Explosion(self.x, self.y))
-                return True  # 衝突発生
-        return False  # 衝突なし
-
     def draw(self):
         if self.is_alive:
             pyxel.circ(self.x, self.y, METEOR_RADIUS, METEOR_COLOR)

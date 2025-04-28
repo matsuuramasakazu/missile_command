@@ -3,7 +3,6 @@ import math
 import random
 from constants import *
 from meteor import Meteor
-from explosion import Explosion
 
 class MeteorManager:
     def __init__(self, explosions):

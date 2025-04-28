@@ -1,4 +1,3 @@
-import pyxel
 import math
 from constants import *
 from explosion import Explosion
@@ -10,6 +9,7 @@ class ExplosionsDetector:
 
     def check_collisions(self):
         collision_detected = False
+        new_explosions = []
         for explosion in self.explosions:
             if not explosion.is_alive:
                 continue
@@ -19,6 +19,7 @@ class ExplosionsDetector:
                 distance = math.hypot(explosion.x - target.x, explosion.y - target.y)
                 if distance < explosion.radius + COLLISION_DISTANCE:
                     target.is_alive = False
-                    self.explosions.append(Explosion(target.x, target.y))
+                    new_explosions.append(Explosion(target.x, target.y))
                     collision_detected = True
+        self.explosions.extend(new_explosions)
         return collision_detected
