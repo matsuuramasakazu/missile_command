@@ -37,18 +37,15 @@ class Game:
 
         self.meteor_manager.update()
         
-        is_collision = self.missile_explosions_detector.check_collisions()
-        if is_collision:
-            self.score += 5
+        collided_meteors = self.missile_explosions_detector.check_collisions()
+        self.score += len(collided_meteors) * 5
 
-        is_collision = self.meteor_explosions_detector.check_collisions()
-        if is_collision:
-            self.score -= 5
+        collided_bases_cities = self.meteor_explosions_detector.check_collisions()
+        self.score -= len(collided_bases_cities) * 5
 
         self.ufo_manager.update()
-        is_ufo_collision = self.missile_ufo_explosions_detector.check_collisions()
-        if is_ufo_collision:
-            self.score += 10
+        collided_ufos = self.missile_ufo_explosions_detector.check_collisions()
+        self.score += len(collided_ufos) * 10
 
         self.check_game_over()
 

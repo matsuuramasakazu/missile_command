@@ -21,8 +21,8 @@ class TestExplosionsDetector(unittest.TestCase):
         meteor = Meteor(105, 105, 5)
         self.missile_manager.explosions.append(explosion)
         self.meteor_manager.meteors.append(meteor)
-        is_collision = self.detector.check_collisions()
-        self.assertTrue(is_collision)
+        collided_targets = self.detector.check_collisions()
+        self.assertEqual(len(collided_targets), 1)
         self.assertFalse(meteor.is_alive)
 
     def test_check_collisions_false(self):
@@ -32,8 +32,8 @@ class TestExplosionsDetector(unittest.TestCase):
 
         self.missile_manager.explosions.append(explosion)
         self.meteor_manager.meteors.append(meteor)
-        is_collision = self.detector.check_collisions()
-        self.assertFalse(is_collision)
+        collided_targets = self.detector.check_collisions()
+        self.assertEqual(len(collided_targets), 0)
 
     def test_check_collisions_ufo(self):
         explosion = Explosion(100, 100)
@@ -41,8 +41,8 @@ class TestExplosionsDetector(unittest.TestCase):
         ufo = UFO(105, 105)
         self.missile_manager.explosions.append(explosion)
         self.detector.targets = [ufo]  # Check against UFOs
-        is_collision = self.detector.check_collisions()
-        self.assertTrue(is_collision)
+        collided_targets = self.detector.check_collisions()
+        self.assertEqual(len(collided_targets), 1)
         self.assertFalse(ufo.is_alive)
 
     def test_multiple_targets_hit(self):
@@ -52,7 +52,7 @@ class TestExplosionsDetector(unittest.TestCase):
         meteor2 = Meteor(95, 95, 1)
         self.missile_manager.explosions.append(explosion)
         self.detector.targets = [meteor1, meteor2]
-        is_collision = self.detector.check_collisions()
-        self.assertTrue(is_collision)
+        collided_targets = self.detector.check_collisions()
+        self.assertEqual(len(collided_targets), 2)
         self.assertFalse(meteor1.is_alive)
         self.assertFalse(meteor2.is_alive)

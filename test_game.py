@@ -3,8 +3,8 @@ import pyxel
 from unittest.mock import patch
 from game import Game
 from constants import *
-from explosion import Explosion # 追加
-from meteor import Meteor     # 追加
+from explosion import Explosion
+from meteor import Meteor
 
 class TestGame(unittest.TestCase):
     _is_pyxel_initialized = False
@@ -50,37 +50,47 @@ class TestGame(unittest.TestCase):
         self.game.reset() # クリーンな状態で開始
         initial_score = self.game.score
         # 確実に当たる爆発と隕石を用意
-        explosion = Explosion(0, 0) # 修正
+        explosion = Explosion(0, 0)
         explosion.radius = 10
-        meteor = Meteor(0, 0, 1) # 修正
-        meteor.is_alive = True
+        meteor1 = Meteor(0, 0, 1)
+        meteor2 = Meteor(5, 5, 1) # 複数のメテオを用意
+        meteor1.is_alive = True
+        meteor2.is_alive = True
         # Gameオブジェクトのリストに追加
         self.game.explosions.append(explosion)
-        self.game.meteor_manager.meteors.append(meteor)
+        self.game.meteor_manager.meteors.extend([meteor1, meteor2])
         # Detectorのターゲットを更新
         self.game.missile_explosions_detector.targets = self.game.meteor_manager.meteors
 
         self.game.update()
-        # スコアが増加しているはず (本来は+5だが、他の要因も絡むため増加のみ確認)
-        self.assertGreater(self.game.score, initial_score)
+        # 衝突したメテオの数 * 5 だけスコアが増加していることを確認
+        self.assertEqual(self.game.score, initial_score + 2 * 5)
+        self.assertFalse(meteor1.is_alive)
+        self.assertFalse(meteor2.is_alive)
 
     def test_score_decrease_on_meteor_hit_city(self):
         # 隕石命中時のスコア減少
         self.game.reset() # クリーンな状態で開始
         initial_score = self.game.score
+
         # 確実に当たる爆発と都市を用意
         explosion = Explosion(60, 210)
         explosion.radius = 10
-        city = self.game.cities[0]
-        city.is_alive = True
+        city1 = self.game.cities[0] # 爆発範囲内
+        city2 = self.game.cities[1] # 爆発範囲外
+        city1.is_alive = True
+        city2.is_alive = True
+
         # Gameオブジェクトのリストに追加
         self.game.explosions.append(explosion)
-        # Detectorのターゲットを更新
-        self.game.meteor_explosions_detector.targets = self.game.bases + self.game.cities
+        self.game.cities = [city1, city2]
+        self.game.bases = []
 
+        # 衝突した都市の数 * 5 だけスコアが減少していることを確認
         self.game.update()
-        # スコアが減少しているはず (本来は-5だが、他の要因も絡むため減少のみ確認)
-        self.assertLess(self.game.score, initial_score)
+        self.assertEqual(self.game.score, initial_score - 5)
+        self.assertFalse(city1.is_alive)
+        self.assertTrue(city2.is_alive)
 
     def test_game_over_condition(self):
         # 全都市・全基地破壊でゲームオーバー

@@ -17,9 +17,9 @@ class TestExplosion(unittest.TestCase):
         explosion = Explosion(10, 20)
         explosion.update()
         self.assertEqual(explosion.radius, 1.5)
-        self.assertEqual(explosion.duration, 19)
+        self.assertEqual(explosion.duration, 18.5)
 
         # Simulate until explosion is done
-        for _ in range(EXPLOSION_DURATION):
+        for _ in range(int(EXPLOSION_DURATION/EXPLOSION_DURATION_DECREMENT)):
             explosion.update()
         self.assertFalse(explosion.is_alive)
