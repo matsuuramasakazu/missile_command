@@ -6,14 +6,18 @@ classDiagram
     class GameObject {
         <<Abstract>>
     }
+    class MeteorManager
+    class MissileManager
+    class UFOManager
+    class ExplosionsDetector
+    class Explosion
+    class Base
     class City
     class Meteor
     class Missile
-    class Explosion
-    class MeteorManager
-    class MissileManager
-    class ExplosionsDetector
+    class UFO
 
+    direction BT
     City --|> GameObject
     Meteor --|> GameObject
     Missile --|> GameObject
@@ -31,10 +35,8 @@ classDiagram
     Game --> MissileManager
     Game --> UFOManager
     Game --> ExplosionsDetector : references targets(Meteor)
-    Game --> ExplosionsDetector : references targets(City)
+    Game --> ExplosionsDetector : references targets(City,Base)
     Game --> ExplosionsDetector : references targets(UFO)
 
-
     ExplosionsDetector --> Explosion
-    ExplosionsDetector --> GameObject : references targets (City, Meteor, Missile, UFO)
-
+    ExplosionsDetector --> GameObject : references targets (City, Base, Meteor, Missile, UFO)
