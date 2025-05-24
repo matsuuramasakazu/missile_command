@@ -21,5 +21,5 @@ class ExplosionsDetector:
                     target.is_alive = False
                     new_explosions.append(Explosion(target.x, target.y))
                     collided_targets.append(target)
-        self.explosions.extend(new_explosions)
-        return collided_targets
+        # self.explosions.extend(new_explosions) # This line should be removed
+        return (collided_targets, new_explosions) # Return tuple
