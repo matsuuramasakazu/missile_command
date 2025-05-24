@@ -14,12 +14,11 @@ class ExplosionsDetector:
             if not explosion.is_alive:
                 continue
             for target in self.targets:
-                if not target.is_alive:
+                if not target.is_alive: # Still useful to not check already dead targets
                     continue
                 distance = math.hypot(explosion.x - target.x, explosion.y - target.y)
                 if distance < explosion.radius + COLLISION_DISTANCE:
-                    target.is_alive = False
+                    # target.is_alive = False # This line is now removed
                     new_explosions.append(Explosion(target.x, target.y))
-                    collided_targets.append(target)
-        self.explosions.extend(new_explosions)
-        return collided_targets
+                    collided_targets.append(target) # Add target to list of collided, but don't change its state
+        return (collided_targets, new_explosions)
