@@ -26,14 +26,14 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertEqual(len(collided_targets), 1)
         self.assertIn(meteor, collided_targets)
         
-        # Verify target.is_alive was NOT changed by check_collisions
-        self.assertTrue(meteor.is_alive, "check_collisions should not change target.is_alive")
-
         # Verify new explosions
         self.assertEqual(len(new_explosions), 1)
         self.assertIsInstance(new_explosions[0], Explosion)
         self.assertEqual(new_explosions[0].x, meteor.x)
         self.assertEqual(new_explosions[0].y, meteor.y)
+
+        # Verify target.is_alive was NOT changed by check_collisions
+        self.assertTrue(meteor.is_alive, "check_collisions should not change target.is_alive")
 
     def test_check_collisions_false(self): # Renamed for clarity
         trigger_explosion = Explosion(100, 100)
@@ -46,8 +46,13 @@ class TestExplosionsDetector(unittest.TestCase):
 
         collided_targets, new_explosions = self.detector.check_collisions() # Unpack tuple
 
+        # Verify collided targets
         self.assertEqual(len(collided_targets), 0)
+
+        # Verify new explosions
         self.assertEqual(len(new_explosions), 0)
+
+        # Verify target.is_alive was NOT changed by check_collisions
         self.assertTrue(meteor.is_alive) 
 
     def test_check_collisions_ufo(self): # Renamed for clarity
@@ -61,13 +66,18 @@ class TestExplosionsDetector(unittest.TestCase):
 
         collided_targets, new_explosions = self.detector.check_collisions() # Unpack tuple
 
+        # Verify collided targets
         self.assertEqual(len(collided_targets), 1)
         self.assertIn(ufo, collided_targets)
-        self.assertTrue(ufo.is_alive, "check_collisions should not change ufo.is_alive") 
+
+        # Verify new explosions
         self.assertEqual(len(new_explosions), 1)
         self.assertIsInstance(new_explosions[0], Explosion)
         self.assertEqual(new_explosions[0].x, ufo.x)
         self.assertEqual(new_explosions[0].y, ufo.y)
+
+        # Verify target.is_alive was NOT changed by check_collisions
+        self.assertTrue(ufo.is_alive, "check_collisions should not change ufo.is_alive") 
 
     def test_multiple_targets_hit(self): # Renamed for clarity
         trigger_explosion = Explosion(100, 100)
@@ -84,19 +94,23 @@ class TestExplosionsDetector(unittest.TestCase):
         
         collided_targets, new_explosions = self.detector.check_collisions() # Unpack tuple
         
+        # Verify collided targets
         self.assertEqual(len(collided_targets), 2)
         self.assertIn(meteor1, collided_targets)
         self.assertIn(meteor2, collided_targets)
         self.assertNotIn(meteor_miss, collided_targets)
 
-        self.assertTrue(meteor1.is_alive, "check_collisions should not change meteor1.is_alive")
-        self.assertTrue(meteor2.is_alive, "check_collisions should not change meteor2.is_alive")
-        self.assertTrue(meteor_miss.is_alive) 
-        
+        # Verify new explosions
         self.assertEqual(len(new_explosions), 2)
         expected_coords = {(meteor1.x, meteor1.y), (meteor2.x, meteor2.y)}
         actual_coords = {(exp.x, exp.y) for exp in new_explosions}
         self.assertEqual(actual_coords, expected_coords)
+
+        # Verify target.is_alive was NOT changed by check_collisions
+        self.assertTrue(meteor1.is_alive, "check_collisions should not change meteor1.is_alive")
+        self.assertTrue(meteor2.is_alive, "check_collisions should not change meteor2.is_alive")
+        self.assertTrue(meteor_miss.is_alive) 
+        
 
     def test_target_already_not_alive(self): # New test
         trigger_explosion = Explosion(100, 100)
@@ -108,8 +122,14 @@ class TestExplosionsDetector(unittest.TestCase):
         self.detector.targets = [meteor]
 
         collided_targets, new_explosions = self.detector.check_collisions()
+
+        # Verify collided targets
         self.assertEqual(len(collided_targets), 0)
+
+        # Verify new explosions
         self.assertEqual(len(new_explosions), 0)
+
+        # Verify target.is_alive was NOT changed by check_collisions
         self.assertFalse(meteor.is_alive)
 
     def test_explosion_not_alive(self): # New test
@@ -123,6 +143,12 @@ class TestExplosionsDetector(unittest.TestCase):
         self.detector.targets = [meteor]
 
         collided_targets, new_explosions = self.detector.check_collisions()
+
+        # Verify collided targets
         self.assertEqual(len(collided_targets), 0)
+
+        # Verify new explosions
         self.assertEqual(len(new_explosions), 0)
+
+        # Verify target.is_alive was NOT changed by check_collisions
         self.assertTrue(meteor.is_alive)
