@@ -5,6 +5,7 @@ from city import City
 from meteor_manager import MeteorManager
 from missile_manager import MissileManager
 from explosions_detector import ExplosionsDetector
+from explosion import Explosion # Import Explosion
 from ufo_manager import UFOManager
 
 class Game:
@@ -34,27 +35,32 @@ class Game:
             return
 
         self.missile_manager.update()
-
         self.meteor_manager.update()
-        
-        collided_meteors, new_meteors_explosions = self.missile_explosions_detector.check_collisions()
+        self.ufo_manager.update()
+
+        collided_meteors = self.missile_explosions_detector.check_collisions()
+        new_meteors_explosions = []
+        for meteor in collided_meteors:
+            new_meteors_explosions.append(Explosion(meteor.x, meteor.y))
+            meteor.is_alive = False
         self.explosions.extend(new_meteors_explosions)
         self.score += len(collided_meteors) * 5
-        for meteor in collided_meteors: # New loop
-            meteor.is_alive = False     # New line
 
-        collided_bases_cities, new_bases_cities_explosions = self.meteor_explosions_detector.check_collisions()
+        collided_bases_cities = self.meteor_explosions_detector.check_collisions()
+        new_bases_cities_explosions = []
+        for item in collided_bases_cities:
+            new_bases_cities_explosions.append(Explosion(item.x, item.y))
+            item.is_alive = False
         self.explosions.extend(new_bases_cities_explosions)
         self.score -= len(collided_bases_cities) * 5 # Note: This looks like a bug, score should probably increase. However, stick to the requested change for now.
-        for item in collided_bases_cities: # New loop
-            item.is_alive = False      # New line
 
-        self.ufo_manager.update()
-        collided_ufos, new_ufos_explosions = self.missile_ufo_explosions_detector.check_collisions()
+        collided_ufos = self.missile_ufo_explosions_detector.check_collisions()
+        new_ufos_explosions = []
+        for ufo in collided_ufos:
+            new_ufos_explosions.append(Explosion(ufo.x, ufo.y))
+            ufo.is_alive = False
         self.explosions.extend(new_ufos_explosions)
         self.score += len(collided_ufos) * 10
-        for ufo in collided_ufos: # New loop
-            ufo.is_alive = False  # New line
 
         self.check_game_over()
 

@@ -9,7 +9,6 @@ class ExplosionsDetector:
 
     def check_collisions(self):
         collided_targets = []
-        new_explosions = []
         for explosion in self.explosions:
             if not explosion.is_alive:
                 continue
@@ -19,6 +18,5 @@ class ExplosionsDetector:
                 distance = math.hypot(explosion.x - target.x, explosion.y - target.y)
                 if distance < explosion.radius + COLLISION_DISTANCE:
                     # target.is_alive = False # This line is now removed
-                    new_explosions.append(Explosion(target.x, target.y))
                     collided_targets.append(target) # Add target to list of collided, but don't change its state
-        return (collided_targets, new_explosions)
+        return collided_targets
