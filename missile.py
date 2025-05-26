@@ -14,10 +14,9 @@ class Missile(GameObject):
         self.target_x = target_x
         self.target_y = target_y
         self.speed = MISSILE_SPEED
-        self.explosion = None
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
 
-    def update(self):
+    def update(self, explosions_list):
         if not self.is_alive:
             return
 
@@ -29,7 +28,7 @@ class Missile(GameObject):
             self.x = self.target_x
             self.y = self.target_y
             self.is_alive = False
-            self.explosion = Explosion(self.x, self.y)
+            explosions_list.append(Explosion(self.x, self.y))
         else:
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)

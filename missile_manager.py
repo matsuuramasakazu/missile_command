@@ -17,11 +17,9 @@ class MissileManager:
 
         updated_missiles = []
         for missile in self.missiles:
-            missile.update()
+            missile.update(self.explosions)
             if missile.is_alive:
                 updated_missiles.append(missile)
-            elif missile.explosion:
-                self.explosions.append(missile.explosion)
         self.missiles[:] = updated_missiles
 
         updated_explosions = []
