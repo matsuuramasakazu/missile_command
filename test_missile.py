@@ -3,6 +3,7 @@ import pyxel
 import math
 from unittest.mock import patch
 from missile import Missile
+from explosion import Explosion # Ensuring this import is present
 from base import Base
 from constants import *
 
@@ -16,11 +17,14 @@ class TestMissile(unittest.TestCase):
         self.assertEqual(missile.target_y, 100)
         self.assertEqual(missile.speed, MISSILE_SPEED)
         self.assertTrue(missile.is_alive)
-        self.assertIsNone(missile.explosion)
+        # self.assertIsNone(missile.explosion) # Removed
 
     def test_missile_update_reach_target(self):
         base = Base(100)
         missile = Missile(base, 105, BASE_Y)
-        missile.update()
+        explosions_list = [] # Added
+        missile.update(explosions_list) # Changed
         self.assertFalse(missile.is_alive)
-        self.assertIsNotNone(missile.explosion)
+        # self.assertIsNotNone(missile.explosion) # Removed
+        self.assertEqual(len(explosions_list), 1) # Added
+        self.assertIsInstance(explosions_list[0], Explosion) # Added
