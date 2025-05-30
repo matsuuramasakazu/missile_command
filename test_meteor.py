@@ -1,10 +1,6 @@
 import unittest
-import pyxel
 import math
-from unittest.mock import patch
 from meteor import Meteor
-from base import Base
-from city import City
 from constants import *
 
 class TestMeteor(unittest.TestCase):

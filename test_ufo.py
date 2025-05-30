@@ -1,5 +1,4 @@
 import unittest
-import pyxel
 from ufo import UFO
 from constants import *
 

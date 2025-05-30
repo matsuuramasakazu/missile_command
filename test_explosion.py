@@ -1,5 +1,4 @@
 import unittest
-import pyxel
 from explosion import Explosion
 from constants import *
 

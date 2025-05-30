@@ -1,7 +1,4 @@
 import unittest
-import pyxel
-import math
-from unittest.mock import patch
 from missile import Missile
 from explosion import Explosion # Ensuring this import is present
 from base import Base
