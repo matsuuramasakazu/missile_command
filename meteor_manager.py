@@ -3,11 +3,13 @@ import math
 import random
 from constants import *
 from meteor import Meteor
+# from explosion_manager import ExplosionManager # Not strictly needed if only passing manager instance
 
 class MeteorManager:
-    def __init__(self, explosions):
-        self.explosions = explosions
+    def __init__(self, explosion_manager): # Changed explosions to explosion_manager
+        self.explosion_manager = explosion_manager # Stored explosion_manager
         self.meteors = []
+        # self.explosions = explosions # Removed
 
     def update(self):
         if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
@@ -25,20 +27,25 @@ class MeteorManager:
 
         updated_meteors = []
         for meteor in self.meteors:
-            meteor.update(self.explosions)
+            # If meteor.update() itself can cause an explosion (e.g. expiration), it should return an Explosion object
+            new_explosion = meteor.update() # Anticipate meteor.update() returning an Explosion or None
+            if new_explosion:
+                self.explosion_manager.add_explosion_object(new_explosion)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
         self.meteors[:] = updated_meteors
 
-        updated_explosions = []
-        for explosion in self.explosions:
-            explosion.update()
-            if explosion.is_alive:
-                updated_explosions.append(explosion)
-        self.explosions[:] = updated_explosions
+        # Removed the explosion update loop, as it's handled by ExplosionManager
+        # updated_explosions = []
+        # for explosion in self.explosions:
+        #     explosion.update()
+        #     if explosion.is_alive:
+        #         updated_explosions.append(explosion)
+        # self.explosions[:] = updated_explosions
 
     def draw(self):
         for meteor in self.meteors:
             meteor.draw()
-        for explosion in self.explosions:
-            explosion.draw()
+        # Removed drawing explosions, as it's handled by ExplosionManager
+        # for explosion in self.explosions:
+        #     explosion.draw()
