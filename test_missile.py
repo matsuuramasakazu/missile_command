@@ -19,9 +19,6 @@ class TestMissile(unittest.TestCase):
     def test_missile_update_reach_target(self):
         base = Base(100)
         missile = Missile(base, 105, BASE_Y)
-        explosions_list = [] # Added
-        missile.update(explosions_list) # Changed
+        new_explosion = missile.update()
         self.assertFalse(missile.is_alive)
-        # self.assertIsNotNone(missile.explosion) # Removed
-        self.assertEqual(len(explosions_list), 1) # Added
-        self.assertIsInstance(explosions_list[0], Explosion) # Added
+        self.assertIsNotNone(new_explosion)

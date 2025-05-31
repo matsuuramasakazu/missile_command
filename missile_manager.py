@@ -3,9 +3,9 @@ from constants import *
 from missile import Missile
 
 class MissileManager:
-    def __init__(self, bases, explosions):
+    def __init__(self, bases, explosion_manager):
         self.bases = bases
-        self.explosions = explosions
+        self.explosion_manager = explosion_manager
         self.missiles = []
 
     def update(self):
@@ -17,17 +17,12 @@ class MissileManager:
 
         updated_missiles = []
         for missile in self.missiles:
-            missile.update(self.explosions)
+            new_explosion = missile.update()
+            if new_explosion:
+                self.explosion_manager.add_explosion_object(new_explosion)
             if missile.is_alive:
                 updated_missiles.append(missile)
         self.missiles[:] = updated_missiles
-
-        updated_explosions = []
-        for explosion in self.explosions:
-            explosion.update()
-            if explosion.is_alive:
-                updated_explosions.append(explosion)
-        self.explosions[:] = updated_explosions
 
     def find_nearest_base(self, mouse_x):
         alive_bases = [base for base in self.bases if base.is_alive]
@@ -46,5 +41,3 @@ class MissileManager:
     def draw(self):
         for missile in self.missiles:
             missile.draw()
-        for explosion in self.explosions:
-            explosion.draw()

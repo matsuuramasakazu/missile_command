@@ -57,7 +57,7 @@ class TestGame(unittest.TestCase):
         meteor1.is_alive = True
         meteor2.is_alive = True
         # Gameオブジェクトのリストに追加
-        self.game.explosions.append(explosion)
+        self.game.explosion_manager.add_explosion_object(explosion)
         self.game.meteor_manager.meteors.extend([meteor1, meteor2])
         # Detectorのターゲットを更新
         self.game.missile_explosions_detector.targets = self.game.meteor_manager.meteors
@@ -82,7 +82,7 @@ class TestGame(unittest.TestCase):
         city2.is_alive = True
 
         # Gameオブジェクトのリストに追加
-        self.game.explosions.append(explosion)
+        self.game.explosion_manager.add_explosion_object(explosion)
         self.game.cities = [city1, city2]
         self.game.bases = []
 

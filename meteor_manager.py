@@ -5,8 +5,8 @@ from constants import *
 from meteor import Meteor
 
 class MeteorManager:
-    def __init__(self, explosions):
-        self.explosions = explosions
+    def __init__(self, explosion_manager):
+        self.explosion_manager = explosion_manager
         self.meteors = []
 
     def update(self):
@@ -25,20 +25,14 @@ class MeteorManager:
 
         updated_meteors = []
         for meteor in self.meteors:
-            meteor.update(self.explosions)
+            # If meteor.update() itself can cause an explosion (e.g. expiration), it should return an Explosion object
+            new_explosion = meteor.update() # Anticipate meteor.update() returning an Explosion or None
+            if new_explosion:
+                self.explosion_manager.add_explosion_object(new_explosion)
             if meteor.is_alive:
                 updated_meteors.append(meteor)
         self.meteors[:] = updated_meteors
 
-        updated_explosions = []
-        for explosion in self.explosions:
-            explosion.update()
-            if explosion.is_alive:
-                updated_explosions.append(explosion)
-        self.explosions[:] = updated_explosions
-
     def draw(self):
         for meteor in self.meteors:
             meteor.draw()
-        for explosion in self.explosions:
-            explosion.draw()
