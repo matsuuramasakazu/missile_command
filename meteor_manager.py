@@ -16,7 +16,6 @@ class MeteorManager:
                 angle = random.uniform(-METEOR_ANGLE_RANGE, METEOR_ANGLE_RANGE)
                 meteor_x = random.randint(0, SCREEN_WIDTH) # Assuming SCREEN_WIDTH is a constant
                 meteor_speed = random.uniform(METEOR_SPEED_MIN, METEOR_SPEED_MAX) / 2
-                # Pass platform to Meteor constructor
                 meteor = Meteor(meteor_x, METEOR_INITIAL_Y, meteor_speed, self.platform)
                 meteor.angle = angle
 

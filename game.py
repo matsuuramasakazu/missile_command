@@ -4,10 +4,10 @@ from city import City
 from meteor_manager import MeteorManager
 from missile_manager import MissileManager
 from explosions_detector import ExplosionsDetector
-from explosion import Explosion # Import Explosion
+from explosion import Explosion
 from ufo_manager import UFOManager
 from explosion_manager import ExplosionManager
-from game_platform_interface import IGamePlatform # Import IGamePlatform
+from game_platform_interface import IGamePlatform
 
 class Game:
     def __init__(self, platform: IGamePlatform):
@@ -22,9 +22,7 @@ class Game:
         self.bases = [Base(x, self.platform) for x in BASE_X_POSITIONS]
         self.cities = [City(x, self.platform) for x in CITY_X_POSITIONS]
 
-        # ExplosionManager itself doesn't need the platform in its constructor for now,
-        # but it will handle Explosion objects that do.
-        self.explosion_manager = ExplosionManager()
+        self.explosion_manager = ExplosionManager(self.platform)
         self.meteor_manager = MeteorManager(self.explosion_manager, self.platform)
         self.missile_manager = MissileManager(self.bases, self.explosion_manager, self.platform)
         self.ufo_manager = UFOManager(self.platform)
@@ -58,7 +56,7 @@ class Game:
             # Pass platform to Explosion constructor
             self.explosion_manager.add_explosion_object(Explosion(item.x, item.y, self.platform))
 
-        self.score -= len(collided_bases_cities) * 5 # Negative score for losing cities/bases
+        self.score -= len(collided_bases_cities) * 5
 
         collided_ufos = self.missile_ufo_explosions_detector.check_collisions()
         for ufo in collided_ufos:
@@ -68,7 +66,7 @@ class Game:
 
         self.score += len(collided_ufos) * 10
 
-        self.explosion_manager.update() # Explosion manager updates its explosions
+        self.explosion_manager.update()
         self.check_game_over()
 
     def check_game_over(self):

@@ -1,8 +1,8 @@
-from constants import * # pyxel import removed
-from game_platform_interface import IGamePlatform # Import IGamePlatform
+from constants import *
+from game_platform_interface import IGamePlatform
 
 class Explosion:
-    def __init__(self, x, y, platform: IGamePlatform): # Add platform
+    def __init__(self, x, y, platform: IGamePlatform):
         self.x = x
         self.y = y
         self.radius = EXPLOSION_INITIAL_RADIUS
@@ -23,5 +23,4 @@ class Explosion:
 
     def draw(self):
         if self.is_alive:
-            # Use platform.draw_circle
             self.platform.draw_circle(self.x, self.y, self.radius, EXPLOSION_COLOR)

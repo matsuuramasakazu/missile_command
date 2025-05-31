@@ -1,11 +1,11 @@
-import math # pyxel import removed
+import math
 from constants import *
 from explosion import Explosion
 from game_object import GameObject
-from game_platform_interface import IGamePlatform # Import IGamePlatform
+from game_platform_interface import IGamePlatform
 
 class Meteor(GameObject):
-    def __init__(self, x, y, speed, platform: IGamePlatform): # Add platform
+    def __init__(self, x, y, speed, platform: IGamePlatform):
         super().__init__()
         self.x = x
         self.y = y
