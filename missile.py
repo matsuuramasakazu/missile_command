@@ -1,11 +1,11 @@
-import pyxel
-import math
+import math # pyxel import removed
 from constants import *
 from explosion import Explosion
 from game_object import GameObject
+from game_platform_interface import IGamePlatform # Import IGamePlatform
 
 class Missile(GameObject):
-    def __init__(self, start_base, target_x, target_y):
+    def __init__(self, start_base, target_x, target_y, platform: IGamePlatform): # Add platform
         super().__init__()
         self.start_x = start_base.x
         self.start_y = start_base.y
@@ -15,10 +15,11 @@ class Missile(GameObject):
         self.target_y = target_y
         self.speed = MISSILE_SPEED
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
+        self.platform = platform # Store platform
 
     def update(self):
         if not self.is_alive:
-            return None # Or just return
+            return None
 
         dx = self.target_x - self.x
         dy = self.target_y - self.y
@@ -28,14 +29,16 @@ class Missile(GameObject):
             self.x = self.target_x
             self.y = self.target_y
             self.is_alive = False
-            return Explosion(self.x, self.y) # Return new Explosion object
+            # Create explosion, pass platform
+            return Explosion(self.x, self.y, self.platform)
         else:
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)
 
-        return None # No explosion occurred in this update step
+        return None
 
     def draw(self):
         if self.is_alive:
-            pyxel.line(self.start_x, self.start_y, self.x, self.y, MISSILE_COLOR)
-            pyxel.circ(self.x, self.y, MISSILE_RADIUS, MISSILE_COLOR)
+            # Use platform.draw_line and platform.draw_circle
+            self.platform.draw_line(self.start_x, self.start_y, self.x, self.y, MISSILE_COLOR)
+            self.platform.draw_circle(self.x, self.y, MISSILE_RADIUS, MISSILE_COLOR)
