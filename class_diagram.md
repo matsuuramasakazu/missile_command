@@ -1,6 +1,6 @@
 ```mermaid
 classDiagram
-    direction BT
+    direction TD
 
     class Game {
         +reset()
