@@ -1,11 +1,11 @@
-import math # pyxel import removed
+import math
 from constants import *
 from explosion import Explosion
 from game_object import GameObject
-from game_platform_interface import IGamePlatform # Import IGamePlatform
+from game_platform_interface import IGamePlatform
 
 class Missile(GameObject):
-    def __init__(self, start_base, target_x, target_y, platform: IGamePlatform): # Add platform
+    def __init__(self, start_base, target_x, target_y, platform: IGamePlatform):
         super().__init__()
         self.start_x = start_base.x
         self.start_y = start_base.y
@@ -15,7 +15,7 @@ class Missile(GameObject):
         self.target_y = target_y
         self.speed = MISSILE_SPEED
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
-        self.platform = platform # Store platform
+        self.platform = platform
 
     def update(self):
         if not self.is_alive:
@@ -39,6 +39,5 @@ class Missile(GameObject):
 
     def draw(self):
         if self.is_alive:
-            # Use platform.draw_line and platform.draw_circle
             self.platform.draw_line(self.start_x, self.start_y, self.x, self.y, MISSILE_COLOR)
             self.platform.draw_circle(self.x, self.y, MISSILE_RADIUS, MISSILE_COLOR)

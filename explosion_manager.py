@@ -1,14 +1,13 @@
 # import pyxel # Removed
-from explosion import Explosion # Assuming Explosion is in explosion.py
-from constants import * # If ExplosionManager uses any constants
+from explosion import Explosion
+from constants import *
 
 class ExplosionManager:
-    def __init__(self, platform): # Added platform argument
+    def __init__(self, platform):
         self.explosions = []
-        self.platform = platform # Store platform
+        self.platform = platform
 
     def add_explosion(self, x, y):
-        # Explosion constructor now needs a platform
         new_explosion = Explosion(x, y, self.platform)
         self.explosions.append(new_explosion)
 
@@ -21,14 +20,14 @@ class ExplosionManager:
     def update(self):
         updated_explosions = []
         for explosion in self.explosions:
-            explosion.update() # Explosion.update() will use its own platform if needed
+            explosion.update()
             if explosion.is_alive:
                 updated_explosions.append(explosion)
         self.explosions[:] = updated_explosions
 
     def draw(self):
         for explosion in self.explosions:
-            explosion.draw() # Explosion.draw() will use its own platform
+            explosion.draw()
 
     def get_explosions(self):
         return self.explosions

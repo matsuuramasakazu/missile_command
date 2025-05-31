@@ -16,7 +16,7 @@ class MissileManager:
                 mouse_y = self.platform.get_mouse_y()
                 nearest_base = self.find_nearest_base(mouse_x)
                 if nearest_base:
-                    self.missiles.append(Missile(nearest_base, mouse_x, mouse_y, self.platform)) # Pass platform
+                    self.missiles.append(Missile(nearest_base, mouse_x, mouse_y, self.platform))
 
         updated_missiles = []
         for missile in self.missiles:

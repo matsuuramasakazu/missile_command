@@ -1,16 +1,13 @@
 import unittest
-# Note: pyxel and unittest.mock.patch are now fully removed.
 from game import Game
 from constants import *
 from explosion import Explosion
 from meteor import Meteor
-from test_game_platform import TestGamePlatform # Added
+from test_game_platform import TestGamePlatform
 
 class TestGame(unittest.TestCase):
-    # _is_pyxel_initialized is removed
-
     def setUp(self):
-        self.platform = TestGamePlatform() # Create TestGamePlatform instance
+        self.platform = TestGamePlatform()
         self.game = Game(self.platform) # Pass platform to Game constructor
 
     def test_reset(self):
@@ -20,8 +17,7 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.score, 0)
         self.assertFalse(self.game.game_over)
 
-    # @patch decorators removed
-    def test_update_missile_launch(self): # mock_btnp argument removed
+    def test_update_missile_launch(self):
         # Simulate mouse position using the platform
         self.platform.set_mouse_position(200, 150)
         # Simulate mouse button press using the platform
@@ -51,10 +47,10 @@ class TestGame(unittest.TestCase):
         self.game.reset() # クリーンな状態で開始
         initial_score = self.game.score
         # 確実に当たる爆発と隕石を用意
-        explosion = Explosion(0, 0, self.platform) # Added platform
+        explosion = Explosion(0, 0, self.platform)
         explosion.radius = 10
-        meteor1 = Meteor(0, 0, 1, self.platform) # Added platform
-        meteor2 = Meteor(5, 5, 1, self.platform) # Added platform
+        meteor1 = Meteor(0, 0, 1, self.platform)
+        meteor2 = Meteor(5, 5, 1, self.platform)
         meteor1.is_alive = True
         meteor2.is_alive = True
         # Gameオブジェクトのリストに追加
@@ -75,7 +71,7 @@ class TestGame(unittest.TestCase):
         initial_score = self.game.score
 
         # 確実に当たる爆発と都市を用意
-        explosion = Explosion(60, 210, self.platform) # Added platform
+        explosion = Explosion(60, 210, self.platform)
         explosion.radius = 10
         city1 = self.game.cities[0] # 爆発範囲内
         city2 = self.game.cities[1] # 爆発範囲外

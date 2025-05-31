@@ -14,9 +14,9 @@ class TestExplosionsDetector(unittest.TestCase):
         self.detector = ExplosionsDetector([], [])
 
     def test_check_collisions_true(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 10
-        meteor = Meteor(105, 105, 5, self.platform) # Added platform
+        meteor = Meteor(105, 105, 5, self.platform)
         meteor.is_alive = True 
 
         self.detector.explosions = [trigger_explosion] 
@@ -28,9 +28,9 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertTrue(meteor.is_alive, "check_collisions should not change target.is_alive")
 
     def test_check_collisions_false(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 1
-        meteor = Meteor(110, 110, 5, self.platform) # Added platform
+        meteor = Meteor(110, 110, 5, self.platform)
         meteor.is_alive = True
 
         self.detector.explosions = [trigger_explosion]
@@ -41,9 +41,9 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertTrue(meteor.is_alive) 
 
     def test_check_collisions_ufo(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 10
-        ufo = UFO(105, 105, self.platform) # Added platform
+        ufo = UFO(105, 105, self.platform)
         ufo.is_alive = True 
 
         self.detector.explosions = [trigger_explosion]
@@ -55,13 +55,13 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertTrue(ufo.is_alive, "check_collisions should not change ufo.is_alive") 
 
     def test_multiple_targets_hit(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 15
-        meteor1 = Meteor(105, 105, 1, self.platform) # Added platform
+        meteor1 = Meteor(105, 105, 1, self.platform)
         meteor1.is_alive = True
-        meteor2 = Meteor(95, 95, 1, self.platform) # Added platform
+        meteor2 = Meteor(95, 95, 1, self.platform)
         meteor2.is_alive = True
-        meteor_miss = Meteor(130, 130, 1, self.platform) # Added platform
+        meteor_miss = Meteor(130, 130, 1, self.platform)
         meteor_miss.is_alive = True
 
         self.detector.explosions = [trigger_explosion]
@@ -77,9 +77,9 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertTrue(meteor_miss.is_alive) 
         
     def test_target_already_not_alive(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 10
-        meteor = Meteor(105, 105, 5, self.platform) # Added platform
+        meteor = Meteor(105, 105, 5, self.platform)
         meteor.is_alive = False 
 
         self.detector.explosions = [trigger_explosion]
@@ -90,10 +90,10 @@ class TestExplosionsDetector(unittest.TestCase):
         self.assertFalse(meteor.is_alive)
 
     def test_explosion_not_alive(self):
-        trigger_explosion = Explosion(100, 100, self.platform) # Added platform
+        trigger_explosion = Explosion(100, 100, self.platform)
         trigger_explosion.radius = 10
         trigger_explosion.is_alive = False 
-        meteor = Meteor(105, 105, 5, self.platform) # Added platform
+        meteor = Meteor(105, 105, 5, self.platform)
         meteor.is_alive = True
 
         self.detector.explosions = [trigger_explosion]

@@ -1,19 +1,17 @@
 import random
 from constants import *
 from ufo import UFO
-from game_platform_interface import IGamePlatform # Import IGamePlatform
+from game_platform_interface import IGamePlatform
 
 class UFOManager:
-    def __init__(self, platform: IGamePlatform): # Add platform argument
-        self.platform = platform # Store platform
+    def __init__(self, platform: IGamePlatform):
+        self.platform = platform
         self.ufos = []
-        # Use platform.get_frame_count()
         self.next_spawn_frame = self.platform.get_frame_count() + random.uniform(UFO_SPAWN_INTERVAL, UFO_SPAWN_INTERVAL * 5)
 
     def update(self):
-        if self.platform.get_frame_count() >= self.next_spawn_frame: # Use platform
+        if self.platform.get_frame_count() >= self.next_spawn_frame:
             self.spawn_ufo()
-            # Use platform.get_frame_count()
             self.next_spawn_frame = self.platform.get_frame_count() + random.uniform(UFO_SPAWN_INTERVAL, UFO_SPAWN_INTERVAL * 5)
 
         updated_ufos = []
