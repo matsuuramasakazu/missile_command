@@ -1,20 +1,17 @@
 import unittest
-import pyxel
-from unittest.mock import patch
+# Note: pyxel and unittest.mock.patch are now fully removed.
 from game import Game
 from constants import *
 from explosion import Explosion
 from meteor import Meteor
+from test_game_platform import TestGamePlatform # Added
 
 class TestGame(unittest.TestCase):
-    _is_pyxel_initialized = False
+    # _is_pyxel_initialized is removed
 
     def setUp(self):
-        if TestGame._is_pyxel_initialized == False:
-            pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Missile Command")
-            TestGame._is_pyxel_initialized = True
-
-        self.game = Game()
+        self.platform = TestGamePlatform() # Create TestGamePlatform instance
+        self.game = Game(self.platform) # Pass platform to Game constructor
 
     def test_reset(self):
         self.game.reset()
@@ -23,15 +20,19 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.score, 0)
         self.assertFalse(self.game.game_over)
 
-    @patch('pyxel.frame_count', 0)
-    @patch('pyxel.btnp')
-    def test_update_missile_launch(self, mock_btnp):
-        mock_btnp.return_value = True
-        pyxel.mouse_x = 200
-        pyxel.mouse_y = 150
+    # @patch decorators removed
+    def test_update_missile_launch(self): # mock_btnp argument removed
+        # Simulate mouse position using the platform
+        self.platform.set_mouse_position(200, 150)
+        # Simulate mouse button press using the platform
+        self.platform.set_mouse_button_pressed(self.platform.get_mouse_button_left(), True)
 
+        # game.update() will now use the platform for input checks
         self.game.update()
         self.assertEqual(len(self.game.missile_manager.missiles), 1)
+
+        # Release the mouse button to avoid side effects in other tests
+        self.platform.set_mouse_button_pressed(self.platform.get_mouse_button_left(), False)
 
     def test_check_game_over_true(self):
         for base in self.game.bases:
@@ -42,7 +43,7 @@ class TestGame(unittest.TestCase):
         self.assertTrue(self.game.game_over)
 
     def test_check_game_over_false(self):
-        self.game.update()
+        self.game.update() # Assumes game.update() uses platform's frame_count if needed
         self.assertFalse(self.game.game_over)
 
     def test_score_increase_on_missile_hit(self):
@@ -50,10 +51,10 @@ class TestGame(unittest.TestCase):
         self.game.reset() # クリーンな状態で開始
         initial_score = self.game.score
         # 確実に当たる爆発と隕石を用意
-        explosion = Explosion(0, 0)
+        explosion = Explosion(0, 0, self.platform) # Added platform
         explosion.radius = 10
-        meteor1 = Meteor(0, 0, 1)
-        meteor2 = Meteor(5, 5, 1) # 複数のメテオを用意
+        meteor1 = Meteor(0, 0, 1, self.platform) # Added platform
+        meteor2 = Meteor(5, 5, 1, self.platform) # Added platform
         meteor1.is_alive = True
         meteor2.is_alive = True
         # Gameオブジェクトのリストに追加
@@ -62,7 +63,7 @@ class TestGame(unittest.TestCase):
         # Detectorのターゲットを更新
         self.game.missile_explosions_detector.targets = self.game.meteor_manager.meteors
 
-        self.game.update()
+        self.game.update() # Assumes game.update() uses platform's frame_count
         # 衝突したメテオの数 * 5 だけスコアが増加していることを確認
         self.assertEqual(self.game.score, initial_score + 2 * 5)
         self.assertFalse(meteor1.is_alive)
@@ -74,7 +75,7 @@ class TestGame(unittest.TestCase):
         initial_score = self.game.score
 
         # 確実に当たる爆発と都市を用意
-        explosion = Explosion(60, 210)
+        explosion = Explosion(60, 210, self.platform) # Added platform
         explosion.radius = 10
         city1 = self.game.cities[0] # 爆発範囲内
         city2 = self.game.cities[1] # 爆発範囲外
@@ -87,7 +88,7 @@ class TestGame(unittest.TestCase):
         self.game.bases = []
 
         # 衝突した都市の数 * 5 だけスコアが減少していることを確認
-        self.game.update()
+        self.game.update() # Assumes game.update() uses platform's frame_count
         self.assertEqual(self.game.score, initial_score - 5)
         self.assertFalse(city1.is_alive)
         self.assertTrue(city2.is_alive)

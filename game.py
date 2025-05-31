@@ -22,9 +22,8 @@ class Game:
         self.bases = [Base(x, self.platform) for x in BASE_X_POSITIONS]
         self.cities = [City(x, self.platform) for x in CITY_X_POSITIONS]
 
-        # ExplosionManager itself doesn't need the platform in its constructor for now,
-        # but it will handle Explosion objects that do.
-        self.explosion_manager = ExplosionManager()
+        # ExplosionManager constructor now requires the platform instance.
+        self.explosion_manager = ExplosionManager(self.platform)
         self.meteor_manager = MeteorManager(self.explosion_manager, self.platform)
         self.missile_manager = MissileManager(self.bases, self.explosion_manager, self.platform)
         self.ufo_manager = UFOManager(self.platform)
