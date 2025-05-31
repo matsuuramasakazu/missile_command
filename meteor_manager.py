@@ -3,13 +3,11 @@ import math
 import random
 from constants import *
 from meteor import Meteor
-# from explosion_manager import ExplosionManager # Not strictly needed if only passing manager instance
 
 class MeteorManager:
-    def __init__(self, explosion_manager): # Changed explosions to explosion_manager
-        self.explosion_manager = explosion_manager # Stored explosion_manager
+    def __init__(self, explosion_manager):
+        self.explosion_manager = explosion_manager
         self.meteors = []
-        # self.explosions = explosions # Removed
 
     def update(self):
         if pyxel.frame_count % METEOR_SPAWN_INTERVAL == 0:
@@ -35,17 +33,6 @@ class MeteorManager:
                 updated_meteors.append(meteor)
         self.meteors[:] = updated_meteors
 
-        # Removed the explosion update loop, as it's handled by ExplosionManager
-        # updated_explosions = []
-        # for explosion in self.explosions:
-        #     explosion.update()
-        #     if explosion.is_alive:
-        #         updated_explosions.append(explosion)
-        # self.explosions[:] = updated_explosions
-
     def draw(self):
         for meteor in self.meteors:
             meteor.draw()
-        # Removed drawing explosions, as it's handled by ExplosionManager
-        # for explosion in self.explosions:
-        #     explosion.draw()

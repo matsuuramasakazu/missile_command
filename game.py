@@ -44,7 +44,6 @@ class Game:
             meteor.is_alive = False
             self.explosion_manager.add_explosion_object(Explosion(meteor.x, meteor.y))
         
-        self.missile_manager.update()
         self.score += len(collided_meteors) * 5
 
         collided_bases_cities = self.meteor_explosions_detector.check_collisions()
@@ -52,7 +51,6 @@ class Game:
             item.is_alive = False
             self.explosion_manager.add_explosion_object(Explosion(item.x, item.y))
 
-        self.meteor_manager.update()
         self.score -= len(collided_bases_cities) * 5
 
         collided_ufos = self.missile_ufo_explosions_detector.check_collisions()
@@ -60,7 +58,6 @@ class Game:
             ufo.is_alive = False
             self.explosion_manager.add_explosion_object(Explosion(ufo.x, ufo.y))
 
-        self.ufo_manager.update()
         self.score += len(collided_ufos) * 10
 
         self.explosion_manager.update()

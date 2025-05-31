@@ -45,3 +45,9 @@ class TestMeteor(unittest.TestCase):
         meteor._move()
         self.assertAlmostEqual(meteor.x, 10 + 3 * math.cos(math.radians(45)))
         self.assertAlmostEqual(meteor.y, 20 + 3 * math.sin(math.radians(45)))
+
+    def test_meteor_update_reach_grand(self):
+        meteor = Meteor(105, GRAND_Y-2, 1)
+        new_explosion = meteor.update()
+        self.assertFalse(meteor.is_alive)
+        self.assertIsNotNone(new_explosion)

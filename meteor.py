@@ -24,10 +24,9 @@ class Meteor(GameObject):
             return Explosion(self.x, self.y) # Return new Explosion object
 
         # Check if meteor is off-screen (optional, could be handled by a manager or if it expires)
-        # For example:
-        # if self.x < -METEOR_OFFSCREEN_OFFSET or self.x > SCREEN_WIDTH + METEOR_OFFSCREEN_OFFSET or self.y > SCREEN_HEIGHT + METEOR_OFFSCREEN_OFFSET:
-        #    self.is_alive = False
-        #    return None # Or an explosion if off-screen meteors should explode
+        if self.x < -METEOR_OFFSCREEN_OFFSET or self.x > SCREEN_WIDTH + METEOR_OFFSCREEN_OFFSET or self.y > SCREEN_HEIGHT + METEOR_OFFSCREEN_OFFSET:
+           self.is_alive = False
+           return None # Or an explosion if off-screen meteors should explode
 
         return None # No explosion occurred in this update step
 

@@ -15,16 +15,10 @@ class Missile(GameObject):
         self.target_y = target_y
         self.speed = MISSILE_SPEED
         self.angle = math.atan2(target_y - self.start_y, target_x - self.start_x)
-        # self.lifetime = MISSILE_LIFETIME # Example if missiles had a max lifetime
 
-    def update(self): # Removed explosions_list from parameters
+    def update(self):
         if not self.is_alive:
             return None # Or just return
-
-        # self.lifetime -= 1 # Example lifetime decrement
-        # if self.lifetime <= 0:
-        #     self.is_alive = False
-        #     return Explosion(self.x, self.y)
 
         dx = self.target_x - self.x
         dy = self.target_y - self.y
